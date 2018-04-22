@@ -112,11 +112,15 @@ void setup() {
 void loop() {
 
   int buttonReading = digitalRead(rst);
+//    Serial.println(buttonReading);
+
   debounce(buttonReading);
   
 //  Serial.println(buttonState);
 
-  
+  if(buttonState){
+    reset();
+  }
 
   if (NoCardCnt > 150){
     reset();
@@ -238,7 +242,7 @@ void failAction(){
 
 void debounce(int reading){
   unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-  unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+  unsigned long debounceDelay = 20;    // the debounce time; increase if the output flickers
 
     // If the switch changed, due to noise or pressing:
   if (reading != lastButtonState) {
