@@ -1,4 +1,4 @@
-This foundamental function is used to designed a delayed button input so that after a required time pressed a control signal will be sent to control external devices, such as: Control lights on/off.  Locker open/close.
+This foundamental function is used to design a delayed button input so that after a required time pressed, a control signal will be sent to control external devices, such as: Control lights on/off.  Locker open/close.
 
 parameters declearation:
 
