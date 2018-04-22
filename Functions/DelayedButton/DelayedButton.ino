@@ -5,7 +5,7 @@ int CurrentState = 12;   // To indicate current state of this model, High: Worki
 
 unsigned long startTime; // starttime when button pressed
 unsigned long duration;  // duration for button pressed
-unsigned long debounceDelay = 50;    //Debounce thereshoul
+unsigned long debounceDelay = 50;    //Debounce thereshold
 
 void setup()
 {
