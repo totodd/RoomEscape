@@ -14,6 +14,4 @@ parameters declearation:
             
       Variables:
         
-            startTime:        Time record when the button is pressed
-            duration:         How long the button has been pressed
-            debounceDelay:    Threshold for button debouncer
+            debounceDelay:    The amount of time to delay (second)
