@@ -15,34 +15,7 @@
  *
  */
 
-/*  Wiring up the RFID Readers ***
- *  RFID readers based on the Mifare RC522 like this one:  http://amzn.to/2gwB81z
- *  get wired up like this:
- *
- *  RFID pin    Arduino pin (above)
- *  _________   ________
- *  SDA          SDA - each RFID board needs its OWN pin on the arduino
- *  SCK          SCK - all RFID boards connect to this one pin
- *  MOSI         MOSI - all RFID boards connect to this one pin
- *  MISO         MISO - all RFID boards connect to this one pin
- *  IRQ          not used
- *  GND          GND - all RFID connect to GND
- *  RST          RST - all RFID boards connect to this one pin
- *  3.3V         3v3 - all RFID connect to 3.3v for power supply
- *
- */
 
-/* SPI pin of each reader
- * SPI SS 1    SDA(SS)      2
- * SPI SS 2    SDA(SS)      3
- * SPI SS 3    SDA(SS)      4
- * SPI SS 4    SDA(SS)      5
- * SPI SS 5    SDA(SS)      6
- * SPI SS 6    SDA(SS)      7
- * SPI SS 7    SDA(SS)      8
- * output                   A2
- * output Indicator         A4
-*/
 
 
 #include <SPI.h>
@@ -55,13 +28,13 @@
 
 
 
-#define output A4
+#define output 6
+ byte count = 0;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
 boolean cardPresentState = false;
-int lastButtonState = LOW;   // the previous reading from the input pin
-int buttonState;  
+
 /**
  * Initialize.
  */
@@ -69,6 +42,7 @@ void setup() {
 
   pinMode(output, OUTPUT);
   digitalWrite(output, LOW);  
+  autoSetAddr();
 
 
   Serial.begin(9600); // Initialize serial communications with the PC
@@ -105,9 +79,51 @@ void loop() {
   }
 
   Serial.println(cardPresentState);
-
-  lastButtonState = cardPresentState;
+  delay(100);
 
 }
 
+void requestEvent() {
+  Wire.write(cardPresentState); // respond with message of 6 bytes
+  // as expected by master
+}
+
+void autoSetAddr(){
+   Serial.println ();
+  Serial.println ("I2C scanner. Scanning ...");
+   int myAddr = 1;
+  int maxAddr = 0;
+  Wire.begin();
+ for (byte i = 1; i < 30; i++)
+ {
+   Wire.beginTransmission (i);
+   if (Wire.endTransmission () == 0)
+     {
+     Serial.print ("Found address: ");
+     Serial.print (i, DEC);
+     Serial.print (" (0x");
+     Serial.print (i, HEX);
+     Serial.println (")");
+     count++;
+     if(i>maxAddr) maxAddr = i;
+     }// end of good response
+    delay (5);  // give devices time to recover
+ } 
+ myAddr = maxAddr+1;
+  // end of for loop
+ Serial.println ("Done.");
+ Serial.print ("Found ");
+ Serial.print (count, DEC);
+ Serial.println (" device(s).");
+
+
+   Serial.print ("my Addr is ");
+ Serial.println (myAddr);
+
+  Wire.begin(myAddr);                // join i2c bus with address #8
+  // Wire.onReceive(receiveEvent); // register event
+  Wire.onRequest(requestEvent); // register event
+
+
+}
 
