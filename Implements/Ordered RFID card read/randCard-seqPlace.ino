@@ -134,16 +134,14 @@ void loop() {
     // Look for new cards
 
     if (mfrc522[reader].PICC_IsNewCardPresent() && mfrc522[reader].PICC_ReadCardSerial()) {
-      cardCount = cardCount + 1;
 
       dump_byte_array(mfrc522[reader].uid.uidByte, mfrc522[reader].uid.size);
 
       // currentSequence[cardCount-1] = reader+1;
-      int readIndex = 0;
       for (int i=0; i<NR_OF_READERS; i++) {
          if (read_rfid == cardstr[i]) {
-           readIndex = i+1;
-           currentSequence[cardCount-1] = readIndex;
+           cardCount = cardCount + 1;
+           currentSequence[cardCount-1] = reader+1;
 
            break;
          }
@@ -231,6 +229,7 @@ void showCurrentSequence(){
         Serial.print(currentSequence[i]);
       }
   Serial.println();
+
 }
 
 void passAction(){

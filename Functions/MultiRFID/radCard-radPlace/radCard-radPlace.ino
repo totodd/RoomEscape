@@ -32,6 +32,16 @@
  *
  */
 
+/* SPI pin of each reader
+ * SPI SS 1    SDA(SS)      2
+ * SPI SS 2    SDA(SS)      3
+ * SPI SS 3    SDA(SS)      4
+ * SPI SS 4    SDA(SS)      5
+ * SPI SS 5    SDA(SS)      6
+ * SPI SS 6    SDA(SS)      7
+ * SPI SS 7    SDA(SS)      8
+*/
+
 
 #include <SPI.h>
 #include <MFRC522.h>
@@ -39,13 +49,17 @@
 #define RST_PIN         9          // Configurable, see typical pin layout above
 
 //each SS_x_PIN variable indicates the unique SS pin for another RFID reader
-#define SS_1_PIN        10         // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 2
-#define SS_2_PIN        8          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
-#define SS_3_PIN        7          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
+#define SS_1_PIN        2         // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 2
+#define SS_2_PIN        3          // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 1
+#define SS_3_PIN        4 
+#define SS_4_PIN        5 
+#define SS_5_PIN        6 
+#define SS_6_PIN        7 
+#define SS_7_PIN        8 
 
 
 //must have one SS_x_PIN for each reader connected
-#define NR_OF_READERS   2
+#define MAX_NR_OF_READERS   2
 
 //indicater of light
 #define indicater1 2
@@ -57,16 +71,17 @@
 int lastButtonState = LOW;   // the previous reading from the input pin
 int buttonState;             // the current reading from the input pin
 
-byte ssPins[] = {SS_1_PIN, SS_2_PIN, SS_3_PIN};
+byte ssPins[7] = {SS_1_PIN, SS_2_PIN, SS_3_PIN, SS_4_PIN, SS_5_PIN, SS_6_PIN, SS_7_PIN};
 
-MFRC522 mfrc522[NR_OF_READERS];   // Create MFRC522 instance.
+MFRC522 mfrc522[MAX_NR_OF_READERS];   // Create MFRC522 instance.
 String read_rfid;
 
 
 
 //this is the pin the relay is on, change as needed for your code
 int NoCardCnt = 0;
-int currentSequence[NR_OF_READERS];
+int NR_OF_READERS = 0;
+int currentSequence[MAX_NR_OF_READERS];
 int cardCount = 0;
 
 // *************customized***************
@@ -100,13 +115,20 @@ void setup() {
 
   SPI.begin();        // Init SPI bus
 
-  for (uint8_t reader = 0; reader < NR_OF_READERS; reader++) {
+  for (uint8_t reader = 0; reader < MAX_NR_OF_READERS; reader++) {
     mfrc522[reader].PCD_Init(ssPins[reader], RST_PIN); // Init each MFRC522 card
     Serial.print(F("Reader "));
     Serial.print(reader);
     Serial.print(F(": "));
-    mfrc522[reader].PCD_DumpVersionToSerial();
+    int ver = mfrc522[reader].PCD_ReadRegister(mfrc522[reader].VersionReg);
+    Serial.println(ver);
+    if (ver != 0) {
+      NR_OF_READERS = NR_OF_READERS+1;
+    } 
   }
+  Serial.print(NR_OF_READERS);
+
+
 
 }
 

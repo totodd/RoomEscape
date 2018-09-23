@@ -67,6 +67,7 @@ String read_rfid;
 //this is the pin the relay is on, change as needed for your code
 int NoCardCnt = 0;
 int currentSequence[NR_OF_READERS];
+int currentPlaceSequence[NR_OF_READERS];
 int cardCount = 0;
 
 // *************customized***************
@@ -134,16 +135,17 @@ void loop() {
     // Look for new cards
 
     if (mfrc522[reader].PICC_IsNewCardPresent() && mfrc522[reader].PICC_ReadCardSerial()) {
-      cardCount = cardCount + 1;
 
       dump_byte_array(mfrc522[reader].uid.uidByte, mfrc522[reader].uid.size);
 
       // currentSequence[cardCount-1] = reader+1;
-      int readIndex = 0;
+      int readcardIndex = 0;
       for (int i=0; i<NR_OF_READERS; i++) {
          if (read_rfid == cardstr[i]) {
-           readIndex = i+1;
-           currentSequence[cardCount-1] = readIndex;
+           readcardIndex = i+1;
+           cardCount = cardCount + 1;
+           currentSequence[cardCount-1] = readcardIndex;
+           currentPlaceSequence[cardCount-1] = reader + 1;
 
            break;
          }
@@ -175,7 +177,7 @@ void loop() {
 
     if(cardCount == NR_OF_READERS){
       showCurrentSequence();
-      if(checkSequence(targetSequence, currentSequence)){
+      if(checkSequence(targetSequence, currentSequence)&&checkSequence(currentSequence, currentPlaceSequence)){
         passAction();
       }else{
         failAction();
@@ -208,6 +210,7 @@ void reset(){
   for (int i = 0; i < NR_OF_READERS; i++)
   {
     currentSequence[i] = 0;
+    currentPlaceSequence[i] = 0;
   }
 }
 
@@ -229,6 +232,10 @@ boolean checkSequence(int target[], int current[]){
 void showCurrentSequence(){
   for (int i = 0; i < NR_OF_READERS; i++){
         Serial.print(currentSequence[i]);
+      }
+  Serial.println();
+  for (int i = 0; i < NR_OF_READERS; i++){
+        Serial.print(currentPlaceSequence[i]);
       }
   Serial.println();
 }
