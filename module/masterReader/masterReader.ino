@@ -12,11 +12,16 @@
 
 #include <Wire.h>
 
+
 #define MAX_NR_OF_SLAVES    20
-int count = 0;
-int slaveArray[MAX_NR_OF_SLAVES];
 
 #define output 10
+
+
+
+int count = 0;
+int slaveArray[MAX_NR_OF_SLAVES];
+int targetPlaceSequence[MAX_NR_OF_READERS];
 
 void setup() {
   Serial.begin (9600);
@@ -24,28 +29,17 @@ void setup() {
 
   pinMode(output, OUTPUT);
 
+  for(int i = 0; i < count; i++){
+    targetPlaceSequence[i] = i + 1;
+  }
+
 }
 
 int reading[MAX_NR_OF_SLAVES];
-
+int currentSequence[count];
 /////////LOOOOOP/////////////////
 void loop() {
-  for (int i = 0; i < count; i++) {
-    int readed;
-    Wire.requestFrom(slaveArray[i], 1);    // request 6 bytes from slave device #8
 
-    while (Wire.available()) { // slave may send less than requested
-      readed = Wire.read(); // receive a byte as character
-    }
-    reading[i] = readed;
-    Serial.print("slave #");
-    Serial.print(slaveArray[i]);
-    Serial.print(":  ");
-    Serial.print(reading[i]);
-    Serial.print("  ");
-
-  }
-  Serial.println();
 
   if (check_condition(reading)) {
     digitalWrite(output, HIGH);
@@ -69,7 +63,7 @@ boolean check_condition(int *arr) {
 }
 
 void scanSlaves(){
-    Serial.println ();
+  Serial.println ();
   Serial.println ("I2C scanner. Scanning ...");
   Wire.begin();
   for (byte i = 1; i < MAX_NR_OF_SLAVES; i++)
@@ -80,10 +74,10 @@ void scanSlaves(){
       Serial.print ("Found address: ");
       Serial.print (i, DEC);
       Serial.print (" (0x");
-      Serial.print (i, HEX);
-      Serial.println (")");
-      slaveArray[count] = i;
-      count++;
+        Serial.print (i, HEX);
+        Serial.println (")");
+        slaveArray[count] = i;
+        count++;
 
     } // end of good response
     delay (5);  // give devices time to recover
@@ -93,4 +87,42 @@ void scanSlaves(){
   Serial.print (count, DEC);
   Serial.println (" device(s).");
 
+}
+
+void storeSequence(){
+   for (int i = 0; i < count; i++) {
+    int readed;
+    Wire.requestFrom(slaveArray[i], 1);    // request 6 bytes from slave device #8
+
+    while (Wire.available()) { // slave may send less than requested
+      readed = Wire.read(); // receive a byte as character
+    }
+    reading[i] = readed;
+    Serial.print("slave #");
+    Serial.print(slaveArray[i]);
+    Serial.print(":  ");
+    Serial.print(reading[i]);
+    Serial.print("  ");
+
+  }
+  Serial.println();
+  currentSequence = reading;
+
+}
+
+
+
+boolean checkSequence(int target[], int current[]){
+    if (sizeof(target) != sizeof(current))
+    {
+      return false;
+    }else{
+      for (int i = 0; i < sizeof(current); i++) {
+        if (target[i]!=current[i])
+        {
+          return false;
+        }
+      }
+      return true;
+    }
 }
