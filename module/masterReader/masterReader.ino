@@ -14,66 +14,107 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define OLED_RESET 4
 
-Adafruit_SSD1306 display(OLED_RESET);
+#define ICPIN_1 2
+#define ICPIN_2 3
+#define ICPIN_3 4
+#define ICPIN_4 5
+#define ICPIN_5 6
+#define ICPIN_6 7
+#define ICPIN_7 8
+#define ICPIN_8 9
+#define ICPIN_9 10
+#define ICPIN_10 11
+#define ICPIN_11 12
+#define ICPIN_12 13
+
+#define MODE_SWITCH A2
+#define rst A1
+#define output A0
+
+#define SEQUENCE_MODE 1
+#define ALLIN_MODE 2
+
+int ICpins[] = {ICPIN_1, ICPIN_2, ICPIN_3, ICPIN_4, ICPIN_5, ICPIN_6, ICPIN_7, ICPIN_8, ICPIN_9, ICPIN_10, ICPIN_11, ICPIN_12};
+
+Adafruit_SSD1306 display;
 #if (SSD1306_LCDHEIGHT != 32)
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
 #endif
 
-#define output 10
-#define MAX_NR_OF_SLAVES    20
-#define IC1 5
 
-int count = 0;
+#define MAX_NR_OF_SLAVES    12
+
+int count;
+int tapCount;
 int slaveArray[MAX_NR_OF_SLAVES];
+int targetSequence[MAX_NR_OF_SLAVES];
+
 void setup() {
   Serial.begin (9600);
-  initDisplay();
+  count = 0;
+  tapCount = 0;
 
+  initDisplay();
   scanSlaves();
 
+  pinMode(rst, INPUT);
   pinMode(output, OUTPUT);
-  pinMode(IC1, INPUT);
+  pinMode(MODE_SWITCH, INPUT);
+
+  for (int i = 0; i < MAX_NR_OF_SLAVES; i++) {
+    pinMode(ICpins[i], INPUT);
+  }
+  
   delay(1000);
+
+  for (int i = 0; i < count; i++) {
+    targetSequence[i] = i;
+  }
 
 }
 
 int reading[MAX_NR_OF_SLAVES];
+int sequence[MAX_NR_OF_SLAVES];
 
-/////////LOOOOOP/////////////////
+String mode = "seq";
+
+
+//------------------loop ----------------
 void loop() {
-  for (int i = 0; i < count; i++) {
-    int readed;
-    Wire.requestFrom(slaveArray[i], 1);    // request 6 bytes from slave device #8
+  if(digitalRead(rst)) resetProgram();
 
-    while (Wire.available()) { // slave may send less than requested
-      readed = Wire.read(); // receive a byte as character
-    }
-    reading[i] = readed;
-    Serial.print("slave #");
-    Serial.print(slaveArray[i]);
-    Serial.print(":  ");
-    Serial.print(reading[i]);
-    Serial.print("  ");
+  if(digitalRead(MODE_SWITCH)) mode = "seq";
+  else mode = "all";
 
-  }
-  Serial.println();
+  if (mode == "seq") sequenceModeProcess();
+  else allinModeProcess();
 
-  if (check_condition(reading)) {
-    digitalWrite(output, HIGH);
-  } else {
-    digitalWrite(output, LOW);
-  }
+  showTextNumber("Dev #: ", count, "Mode: ", mode);
 
-  showTextNumber("Devices: ", count);
 
-  if(digitalRead(IC1)) digitalWrite(output, HIGH);
-  else digitalWrite(output, LOW);
-
-  delay(100);
+  delay(50);
 }
 
+
+
+
+
+
+//--------------functions ------------
+
+void resetProgram(){
+  digitalWrite(output, LOW);
+  setup();
+}
+
+void resetSequnce() {
+  tapCount = 0;
+}
+
+boolean checkSequence(int i, int tapCount) {
+  return (targetSequence[tapCount] == i);
+}
 
 
 boolean check_condition(int *arr) {
@@ -84,6 +125,37 @@ boolean check_condition(int *arr) {
     }
   }
   return true;
+}
+
+void allinModeProcess() {
+  for (int i = 0; i < count; i++) {
+    int input = digitalRead(ICpins[i]);
+    reading[i] = input;
+  }
+
+  if (check_condition(reading)) {
+    passAction();
+  }
+}
+
+void sequenceModeProcess() {
+  for (int i = 0; i < count; i++) {
+    int input = digitalRead(ICpins[i]);
+    if (input == 1) {
+      if (checkSequence(i, tapCount)) {
+        if (tapCount == (count - 1)) return passAction();
+        else {
+          sequence[tapCount] = i;
+          tapCount++;
+        }
+      }
+      else resetSequnce();
+    }
+  }
+}
+
+void passAction() {
+  digitalWrite(output, HIGH);
 }
 
 void scanSlaves() {
@@ -125,7 +197,7 @@ void initDisplay() {
 }
 
 
-void showTextNumber(String s, int num) {
+void showTextNumber(String s, int num, String s2, String s3) {
   // display.setFont(&FreeMonoBold12pt7b);  // Set a custom font
   char string[10];
 
@@ -138,6 +210,8 @@ void showTextNumber(String s, int num) {
   display.clearDisplay();
   display.print(s);
   display.println(string);
+  display.print(s2);
+  display.println(s3);
   display.display();
   // delay(1);
 }
@@ -155,4 +229,9 @@ void showText(String s) {
   display.display();
   // delay(1);
 }
+
+
+
+
+
 
