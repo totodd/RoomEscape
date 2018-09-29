@@ -109,7 +109,7 @@ void loop() {
       else{
         if(read_rfid == cardStored[scanCount]){
           scanCount++;
-          if(scanCount == storedCount) passAction()
+          if(scanCount == storedCount) passAction();
           else return;
         }else{
           scanCount = 0;
@@ -124,6 +124,7 @@ void loop() {
   // Serial.println(cardPresentState);
   delay(100);
 
+}
 }
 
 void passAction(){
@@ -206,4 +207,5 @@ void autoSetAddr(){
 
 
 }
+
 
