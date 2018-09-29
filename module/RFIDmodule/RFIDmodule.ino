@@ -74,11 +74,9 @@ void loop() {
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       cardPresentState = true;
       dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-<<<<<<< HEAD
       if(!inArray(read_rfid, cardStored)){
         cardStored[storedCount] = read_rfid;
         storedCount++;
-=======
       if(settingMode){
         blinkLED(1);
         if(!inArray(read_rfid, cardStored)){
@@ -97,7 +95,6 @@ void loop() {
             scanCount = 0;
           }
         }
->>>>>>> 41bb33a8b2e042dfbfc88a6097f049d456ec56f2
       }
     }  else if (!mfrc522.PICC_ReadCardSerial()){
     cardPresentState = false;
