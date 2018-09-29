@@ -47,6 +47,7 @@ void setup() {
 
   delay(1000);
   pinMode(output, OUTPUT);
+  pinMode(modeSwitch, INPUT);
   digitalWrite(output, LOW);  
   autoSetAddr();
 
@@ -64,7 +65,7 @@ void setup() {
  * Main loop.
  */
 void loop() {
-  if(digitalRead(setMode)){
+  if(digitalRead(modeSwitch)){
     settingMode = !settingMode;
   }
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
@@ -82,7 +83,7 @@ void loop() {
         else{
           if(read_rfid == cardStored[scanCount]){
             scanCount++;
-            if(scanCount == storedCount) passAction()
+            if(scanCount == storedCount) passAction();
             else return;
           }else{
             scanCount = 0;
