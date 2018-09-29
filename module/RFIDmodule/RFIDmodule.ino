@@ -30,6 +30,7 @@
 #define MAX_NR_OF_CARDS  12
 
 #define output 6
+#define outputIndicator 7
  byte count = 0;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
@@ -47,8 +48,11 @@ void setup() {
 
   delay(1000);
   pinMode(output, OUTPUT);
-  pinMode(modeSwitch, INPUT);
+  pinMode(outputIndicator, OUTPUT); 
+
+  pinMode(modeSwitch, INPUT_PULLUP);
   digitalWrite(output, LOW);  
+  digitalWrite(outputIndicator, LOW);  
   autoSetAddr();
 
 
@@ -65,12 +69,12 @@ void setup() {
  * Main loop.
  */
 void loop() {
-  if(digitalRead(modeSwitch)){
+  if(digitalRead(modeSwitch) == 0){
     settingMode = !settingMode;
   }
 
   if(settingMode){
-    blinkLED(1);
+    blinkLED(true);
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       cardPresentState = true;
       dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
@@ -101,7 +105,7 @@ void loop() {
     waitAction();
   }
   }else{
-    blinkLED(0);
+    blinkLED(false);
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       cardPresentState = true;
       dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
@@ -129,19 +133,22 @@ void loop() {
 
 void passAction(){
   digitalWrite(output,HIGH);
+  digitalWrite(outputIndicator, HIGH);
   delay(3000);
   scanCount = 0;
 }
 
 void waitAction(){
   digitalWrite(output,LOW);
+  digitalWrite(outputIndicator, LOW);
+
 }
 
-void blinkLED(int state){
+void blinkLED(boolean state){
   while(state){
-    digitalWrite(output, HIGH);
+    digitalWrite(outputIndicator, HIGH);
     delay(1000);
-    digitalWrite(output, LOW);
+    digitalWrite(outputIndicator, LOW);
     delay(1000);
   }
 
