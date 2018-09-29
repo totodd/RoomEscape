@@ -21,7 +21,7 @@ Adafruit_SSD1306 display;
 
 
 // Declearation of 10 switchs
-int switchs[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+int switchs[] = {2, 4, 3, 5, 6, 12, 8, 9, 10, 11};
 int switchCount = 10;
 
 // Current pin input
@@ -29,14 +29,14 @@ int currentPin[10];
 // Saved pre-setting pin
 int presetPin[10];
 // Used to send external signal
-int externalSignal = A0;
+int externalSignal = A3;
 // used to detect whether it is in pin set mode
 int pinSetFlag = 0;
 // pin store address
 int addr = 0;
 
 // LED to show the action state, blink with 1s, means pin-setting succeed, blink quickly means pin incorrect
-int stateDisplay = A3;
+int stateDisplay = A7;
 // Pin can only be set when this trigger is high
 int pinSetTrigger = A2;
 
@@ -54,7 +54,7 @@ void initDisplay() {
 void setup() {
   Serial.begin(9600);
   for (int thisSwitch = 0; thisSwitch < switchCount; thisSwitch++) {
-    pinMode(switchs[thisSwitch], OUTPUT);
+    pinMode(switchs[thisSwitch], INPUT_PULLUP);
   }
   pinMode(externalSignal, OUTPUT);
   pinMode(stateDisplay, OUTPUT);
@@ -106,6 +106,21 @@ void showText(String s) {
   display.display();
   // delay(1);
 }
+void showTextPlayMode(String s) {
+  // display.setFont(&FreeMonoBold12pt7b);  // Set a custom font
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setTextWrap(true);
+
+  display.setCursor(0, 0);
+  display.clearDisplay();
+
+  display.println("play mode");
+  display.println(s);
+
+  display.display();
+  // delay(1);
+}
 
 // To check Pin is correct
 void pinMatchCheck() {
@@ -126,8 +141,7 @@ void pinMatchCheck() {
 void setPin() {
   for (int thisSwitch = 0; thisSwitch < switchCount; thisSwitch++) {
     presetPin[thisSwitch] = digitalRead(switchs[thisSwitch]);
-    EEPROM.write(addr, currentPin[thisSwitch]);
-    addr = addr + 1;
+    EEPROM.put(thisSwitch, currentPin[thisSwitch]);
   }
   showText("Succeed");
   delay(1000);
@@ -147,9 +161,8 @@ void PinConfiguration() {
   Serial.println("The current pin is ");
   for (int thisSwitch = 0; thisSwitch < switchCount; thisSwitch++) {
     currentPin[thisSwitch] = digitalRead(switchs[thisSwitch]);
-    //Serial.print(currentPin[thisSwitch]);
   }
-  //Serial.println();
+
 
   // pre setting pin display
   Serial.println("The presetting pin is ");
@@ -179,7 +192,7 @@ void loop() {
       pinSetFlag = 0;
     }
     Serial.println("Play mode");
-    showText(String(currentPin[0]) + String(currentPin[1]) + String(currentPin[2]) + String(currentPin[3]) + String(currentPin[4]) + String(currentPin[5]) + String(currentPin[6]) + String(currentPin[7]) + String(currentPin[8]) + String(currentPin[9]));
+    showTextPlayMode(String(currentPin[0]) + String(currentPin[1]) + String(currentPin[2]) + String(currentPin[3]) + String(currentPin[4]) + String(currentPin[5]) + String(currentPin[6]) + String(currentPin[7]) + String(currentPin[8]) + String(currentPin[9]));
     pinMatchCheck();
 
   }
