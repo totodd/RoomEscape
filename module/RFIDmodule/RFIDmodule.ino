@@ -67,33 +67,41 @@ void loop() {
   if(digitalRead(setMode)){
     settingMode = !settingMode;
   }
-  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+
+  if(settingMode){
+    blinkLED(1);
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       cardPresentState = true;
       dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-      if(settingMode){
-        blinkLED(1);
-        if(!inArray(read_rfid, cardStored)){
-          cardStored[storedCount] = read_rfid;
-          storedCount++;
-        }
-      }else{
-        blinkLED(0);
-        if(!inArray(read_rfid, cardStored)) waitAction();
-        else{
-          if(read_rfid == cardStored[scanCount]){
-            scanCount++;
-            if(scanCount == storedCount) passAction()
-            else return;
-          }else{
-            scanCount = 0;
-          }
-        }
+      if(!inArray(read_rfid, cardStored)){
+        cardStored[storedCount] = read_rfid;
+        storedCount++;
       }
-  }
-  else if (!mfrc522.PICC_ReadCardSerial()){
+    }  else if (!mfrc522.PICC_ReadCardSerial()){
     cardPresentState = false;
     waitAction();
   }
+  }else{
+    blinkLED(0);
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+      cardPresentState = true;
+      dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+      if(!inArray(read_rfid, cardStored)) waitAction();
+      else{
+        if(read_rfid == cardStored[scanCount]){
+          scanCount++;
+          if(scanCount == storedCount) passAction()
+          else return;
+        }else{
+          scanCount = 0;
+        }
+      }
+    }  else if (!mfrc522.PICC_ReadCardSerial()){
+    cardPresentState = false;
+    waitAction();
+  }
+  }
+
   // Serial.println(cardPresentState);
   delay(100);
 
