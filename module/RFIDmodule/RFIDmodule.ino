@@ -47,6 +47,7 @@ void setup() {
 
   delay(1000);
   pinMode(output, OUTPUT);
+  pinMode(modeSwitch, INPUT);
   digitalWrite(output, LOW);  
   autoSetAddr();
 
@@ -64,7 +65,7 @@ void setup() {
  * Main loop.
  */
 void loop() {
-  if(digitalRead(setMode)){
+  if(digitalRead(modeSwitch)){
     settingMode = !settingMode;
   }
 
@@ -73,9 +74,30 @@ void loop() {
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       cardPresentState = true;
       dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+<<<<<<< HEAD
       if(!inArray(read_rfid, cardStored)){
         cardStored[storedCount] = read_rfid;
         storedCount++;
+=======
+      if(settingMode){
+        blinkLED(1);
+        if(!inArray(read_rfid, cardStored)){
+          cardStored[storedCount] = read_rfid;
+          storedCount++;
+        }
+      }else{
+        blinkLED(0);
+        if(!inArray(read_rfid, cardStored)) waitAction();
+        else{
+          if(read_rfid == cardStored[scanCount]){
+            scanCount++;
+            if(scanCount == storedCount) passAction();
+            else return;
+          }else{
+            scanCount = 0;
+          }
+        }
+>>>>>>> 41bb33a8b2e042dfbfc88a6097f049d456ec56f2
       }
     }  else if (!mfrc522.PICC_ReadCardSerial()){
     cardPresentState = false;
