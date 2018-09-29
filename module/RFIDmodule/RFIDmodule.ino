@@ -41,6 +41,11 @@ String read_rfid;
 String cardStored[MAX_NR_OF_CARDS];
 int storedCount = 0;
 int scanCount = 0;
+
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// constants won't change:
+const long interval = 1000;  
 /**
  * Initialize.
  */
@@ -145,11 +150,24 @@ void waitAction(){
 }
 
 void blinkLED(boolean state){
+  int ledState = LOW;
   while(state){
-    digitalWrite(outputIndicator, HIGH);
-    delay(1000);
-    digitalWrite(outputIndicator, LOW);
-    delay(1000);
+      unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(outputIndicator, ledState);
+  }
   }
 
 }
