@@ -2,7 +2,22 @@
    This file is used for 10SwitchController, includs pin setting and pin match, when pin matched, external signal will write to HIGH
 */
 #include <EEPROM.h>
-int addr = 0;
+
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+
+Adafruit_SSD1306 display;
+
+
+
+#if (SSD1306_LCDHEIGHT != 32)
+#error("Height incorrect, please fix Adafruit_SSD1306.h!");
+#endif
+
+
 
 
 // Declearation of 10 switchs
@@ -15,14 +30,26 @@ int currentPin[10];
 int presetPin[10];
 // Used to send external signal
 int externalSignal = A0;
-// Used to save new pin
-int pinSetButton = A1;
-// Used to test whether current pin and pre-setting pin matched
-int pinMatchButton = A2;
+// used to detect whether it is in pin set mode
+int pinSetFlag = 0;
+// pin store address
+int addr = 0;
+
 // LED to show the action state, blink with 1s, means pin-setting succeed, blink quickly means pin incorrect
 int stateDisplay = A3;
 // Pin can only be set when this trigger is high
-int pinSetTrigger = A4;
+int pinSetTrigger = A2;
+
+
+void initDisplay() {
+  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
+  // init done
+  display.clearDisplay();
+  display.setRotation(0);
+  display.dim(0);
+}
+
 
 void setup() {
   Serial.begin(9600);
@@ -30,10 +57,9 @@ void setup() {
     pinMode(switchs[thisSwitch], OUTPUT);
   }
   pinMode(externalSignal, OUTPUT);
-  pinMode(pinSetButton, INPUT);
-  pinMode(pinMatchButton, INPUT);
   pinMode(stateDisplay, OUTPUT);
   pinMode(pinSetTrigger, INPUT);
+  initDisplay();
 }
 
 // function to compare two arrays.
@@ -50,7 +76,36 @@ boolean array_cmp(int *a, int *b, int len_a, int len_b) {
   return true;
 }
 
+void showTextNumber(String s, int num) {
+  // display.setFont(&FreeMonoBold12pt7b);  // Set a custom font
+  char string[10];
 
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setTextWrap(true);
+  dtostrf(num, 3, 0, string);
+
+  display.setCursor(0, 0);
+  display.clearDisplay();
+  display.print(s);
+  display.println(string);
+  display.display();
+  // delay(1);
+}
+
+
+void showText(String s) {
+  // display.setFont(&FreeMonoBold12pt7b);  // Set a custom font
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setTextWrap(true);
+
+  display.setCursor(0, 0);
+  display.clearDisplay();
+  display.println(s);
+  display.display();
+  // delay(1);
+}
 
 // To check Pin is correct
 void pinMatchCheck() {
@@ -62,17 +117,6 @@ void pinMatchCheck() {
   }
   else {
     digitalWrite(externalSignal, LOW);
-    digitalWrite(stateDisplay, HIGH);
-    delay(100);
-    digitalWrite(stateDisplay, LOW);
-    delay(100);
-    digitalWrite(stateDisplay, HIGH);
-    delay(100);
-    digitalWrite(stateDisplay, LOW);
-    delay(100);
-    digitalWrite(stateDisplay, HIGH);
-    delay(100);
-    digitalWrite(stateDisplay, LOW);
   }
 
 }
@@ -84,19 +128,9 @@ void setPin() {
     presetPin[thisSwitch] = digitalRead(switchs[thisSwitch]);
     EEPROM.write(addr, currentPin[thisSwitch]);
     addr = addr + 1;
-    delay(100);
   }
-  digitalWrite(stateDisplay, HIGH);
+  showText("Succeed");
   delay(1000);
-  digitalWrite(stateDisplay, LOW);
-  delay(1000);
-  digitalWrite(stateDisplay, HIGH);
-  delay(1000);
-  digitalWrite(stateDisplay, LOW);
-  delay(1000);
-  digitalWrite(stateDisplay, HIGH);
-  delay(1000);
-  digitalWrite(stateDisplay, LOW);
 }
 
 
@@ -104,35 +138,52 @@ void setPin() {
 
 
 
-void loop() {
+
+void PinConfiguration() {
   /*
-     Show message for debug
+    Show message for debug
   */
   // current pin display;
   Serial.println("The current pin is ");
   for (int thisSwitch = 0; thisSwitch < switchCount; thisSwitch++) {
     currentPin[thisSwitch] = digitalRead(switchs[thisSwitch]);
-    Serial.print(currentPin[thisSwitch]);
+    //Serial.print(currentPin[thisSwitch]);
   }
-  Serial.println();
+  //Serial.println();
 
   // pre setting pin display
-  Serial.println("The presetting pin is "); 
+  Serial.println("The presetting pin is ");
   for (int thisaddr = 0; thisaddr < 10; thisaddr++) {
     presetPin[thisaddr] = EEPROM.read(thisaddr);
-    Serial.print(EEPROM.read(thisaddr));
-    
-  }
-  Serial.println();
-  delay(500);
+    //Serial.print(EEPROM.read(thisaddr));
 
-  // When pinSetTrigger is high, in the pin-setting mode, when button pressed, the new pin will be saved
-  if (digitalRead(pinSetButton) == HIGH && digitalRead(pinSetTrigger) == HIGH) {
-    setPin();
   }
-  // When this button is pressed, check whether pre-setting pin matched to the current pin.
-  if (digitalRead(pinMatchButton) == HIGH) {
+  //Serial.println();
+  //delay(500);
+}
+
+
+void loop() {
+
+  PinConfiguration();
+
+  if (digitalRead(pinSetTrigger) == HIGH) {
+    Serial.println("pin set mode");
+    showText("Pin Set");
+    pinSetFlag = 1;
+  }
+  else {
+    if (pinSetFlag == 1) {
+      setPin();
+      delay(3000);
+      pinSetFlag = 0;
+    }
+    Serial.println("Play mode");
+    showText(String(currentPin[0]) + String(currentPin[1]) + String(currentPin[2]) + String(currentPin[3]) + String(currentPin[4]) + String(currentPin[5]) + String(currentPin[6]) + String(currentPin[7]) + String(currentPin[8]) + String(currentPin[9]));
     pinMatchCheck();
+
   }
+
+
 }
 
