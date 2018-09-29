@@ -45,7 +45,7 @@ int scanCount = 0;
 unsigned long previousMillis = 0;        // will store last time LED was updated
 
 // constants won't change:
-const long interval = 1000;  
+const long interval = 5000;  
 /**
  * Initialize.
  */
@@ -73,11 +73,26 @@ void setup() {
 /**
  * Main loop.
  */
+boolean buttonActive = false;
+boolean longPressActive = false;
+long buttonTimer = 0;
+long longPressTime = 10;
 void loop() {
   if(digitalRead(modeSwitch) == 0){
-    settingMode = !settingMode;
+    if(buttonActive == false){
+      buttonActive = true;
+      buttonTimer = millis();
+    }
+    if ((millis() - buttonTimer > longPressTime) && (longPressActive == false)) {
+      longPressActive = true;
+      settingMode = !settingMode;
+    }
+  }else{
+    buttonActive = false;
+    longPressActive = false;
   }
-
+// Serial.println(cardStored[0]);
+ 
   if(settingMode){
     blinkLED(true);
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
@@ -151,7 +166,7 @@ void waitAction(){
 
 void blinkLED(boolean state){
   int ledState = LOW;
-  while(state){
+  if(state){
       unsigned long currentMillis = millis();
 
   if (currentMillis - previousMillis >= interval) {
@@ -169,6 +184,10 @@ void blinkLED(boolean state){
     digitalWrite(outputIndicator, ledState);
   }
   }
+  else{
+    digitalWrite(outputIndicator, LOW);
+  }
+  Serial.println(ledState);
 
 }
 
