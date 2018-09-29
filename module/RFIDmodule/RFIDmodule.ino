@@ -25,8 +25,9 @@
 
 //each SS_x_PIN variable indicates the unique SS pin for another RFID reader
 #define SS_PIN        2         // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 2
+#define modeSwitch 4
 
-
+#define MAX_NR_OF_CARDS  12
 
 #define output 6
  byte count = 0;
@@ -34,12 +35,17 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
 boolean cardPresentState = false;
-
+boolean settingMode = false;
+String read_rfid;
+String cardStored[MAX_NR_OF_CARDS];
+int storedCount = 0;
+int scanCount = 0;
 /**
  * Initialize.
  */
 void setup() {
 
+  delay(1000);
   pinMode(output, OUTPUT);
   digitalWrite(output, LOW);  
   autoSetAddr();
@@ -58,29 +64,76 @@ void setup() {
  * Main loop.
  */
 void loop() {
-
-
+  if(digitalRead(setMode)){
+    settingMode = !settingMode;
+  }
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-    cardPresentState = true;
-
+      cardPresentState = true;
+      dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+      if(settingMode){
+        blinkLED(1);
+        if(!inArray(read_rfid, cardStored)){
+          cardStored[storedCount] = read_rfid;
+          storedCount++;
+        }
+      }else{
+        blinkLED(0);
+        if(!inArray(read_rfid, cardStored)) waitAction();
+        else{
+          if(read_rfid == cardStored[scanCount]){
+            scanCount++;
+            if(scanCount == storedCount) passAction()
+            else return;
+          }else{
+            scanCount = 0;
+          }
+        }
+      }
   }
   else if (!mfrc522.PICC_ReadCardSerial()){
     cardPresentState = false;
+    waitAction();
   }
-
-
-
-  if(cardPresentState){
-    digitalWrite(output,HIGH);
-        delay(3000);
-
-  }else{
-    digitalWrite(output,LOW);
-  }
-
-  Serial.println(cardPresentState);
+  // Serial.println(cardPresentState);
   delay(100);
 
+}
+
+void passAction(){
+  digitalWrite(output,HIGH);
+  delay(3000);
+  scanCount = 0;
+}
+
+void waitAction(){
+  digitalWrite(output,LOW);
+}
+
+void blinkLED(int state){
+  while(state){
+    digitalWrite(output, HIGH);
+    delay(1000);
+    digitalWrite(output, LOW);
+    delay(1000);
+  }
+
+}
+
+boolean inArray(String id, String *array){
+  for (int n = 0; n < storedCount; n++) {
+
+    if (array[n] != id) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void dump_byte_array(byte *buffer, byte bufferSize) {
+  read_rfid = "";
+  for (byte i = 0; i < bufferSize; i++) {
+    read_rfid = read_rfid  + String(buffer[i], HEX);
+  }
 }
 
 void requestEvent() {
