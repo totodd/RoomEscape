@@ -58,7 +58,7 @@ void multiple(int number) {
     digitalWrite(OutputSignal, LOW);
     digitalWrite(CurrentState, LOW);
     for (int thisSignal = 0; thisSignal < number; thisSignal++) {
-      mRegister[thisSignal] = 0;
+      mRegister[thisSignal] = 1;
       Serial.print(mRegister[thisSignal]);
     }
     Serial.println();
