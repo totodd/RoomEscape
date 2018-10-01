@@ -72,7 +72,7 @@ void loop() {
       multiple(2);
         delay(500);
     }
-    else   if (digitalRead(switches[0]) == LOW && digitalRead(switches[1]) == LOW) {
+    else   if (digitalRead(switches[0]) == HIGH && digitalRead(switches[1]) == HIGH) {
     Serial.println("This is mode 2");
       multiple(3);
         delay(500);
