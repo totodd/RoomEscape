@@ -43,9 +43,9 @@ void multiple(int number) {
   int check[number];
   int mRegister[number];
   for (int thisSignal = 0; thisSignal < number; thisSignal++) {
-    check[thisSignal] = 1;
-    if (digitalRead(externalModule[thisSignal]) == HIGH) {
-      mRegister[thisSignal] = 1;
+    check[thisSignal] = 0;
+    if (digitalRead(externalModule[thisSignal]) == LOW) {
+      mRegister[thisSignal] = 0;
       delay(100);
     }
   }
