@@ -3,18 +3,29 @@
    The number of how many sensors can be defined easily
    Similarly, metal detection can also be used using this.
 */
-int number = 4;
-int externalModule[4] = {2, 3, 4, 5};
+#define mSensor1 2
+#define mSensor2 3
+#define mSensor3 4
+#define mSensor4 5
 
-int OutputSignal = 10;  //External Control Pin (current using LED)
-int Reset = 11;   //External Reset (highest level)
-int CurrentState = 12;    //To indicate current state of this model, High: Working; LOW: Idel
-int switches[2] = {6,7};
+
+#define OutputSignal  10  //External Control Pin (current using LED)
+#define Reset  11   //External Reset (highest level)
+#define CurrentState  12    //To indicate current state of this model, High: Working; LOW: Idel
+#define switches1 6
+#define switches2 7
+
+
+int mSensor[] = {mSensor1, mSensor2, mSensor3, mSensor4};
+int switches[] = {switches1, switches2};
+
+int modeNumebr = 0;
+int mRegister[4];
 
 void setup() {
   Serial.begin(9600);
-  for (int thisSignal = 0; thisSignal < number; thisSignal++) {
-    pinMode(externalModule[thisSignal], INPUT_PULLUP);
+  for (int thisSignal = 0; thisSignal < 4; thisSignal++) {
+    pinMode(mSensor[thisSignal], INPUT);
   }
   for (int thisswitch = 0; thisswitch < 2; thisswitch++) {
     pinMode(switches[thisswitch], INPUT_PULLUP);
@@ -40,48 +51,80 @@ boolean array_cmp(int *a, int *b, int len_a, int len_b) {
 
 
 void multiple(int number) {
-  int check[number];
-  int mRegister[number];
-  for (int thisSignal = 0; thisSignal < number; thisSignal++) {
-    check[thisSignal] = 0;
-    if (digitalRead(externalModule[thisSignal]) == LOW) {
-      mRegister[thisSignal] = 0;
-      delay(100);
-    }
-  }
 
-  if (array_cmp(mRegister, check, number, number) == true) {
-    Serial.println("Start");
-    digitalWrite(OutputSignal, HIGH);
-    digitalWrite(CurrentState, HIGH);
-    delay(10000);
-    digitalWrite(OutputSignal, LOW);
-    digitalWrite(CurrentState, LOW);
-    for (int thisSignal = 0; thisSignal < number; thisSignal++) {
-      mRegister[thisSignal] = 1;
-      Serial.print(mRegister[thisSignal]);
-    }
-    Serial.println();
-
+  for(int n = 0; n < number; n++){
+    if(digitalRead(mSensor[n]) == HIGH) mRegister[n] = 1;
   }
+  // Serial.println(check_inputCondition(number, mRegister));
+  if (check_inputCondition(number, mRegister)){
+        digitalWrite(OutputSignal, HIGH);
+        delay(2000);
+        for(int n = 0; n < number; n++){
+          mRegister[n] = 0;
+        }
+
+  }else{
+        digitalWrite(OutputSignal, LOW);
+  }
+  // Serial.println();
+  // delay(500);
+
+  // if (array_cmp(mRegister, check, number, number) == true) {
+  //   Serial.println("Start");
+  //   digitalWrite(OutputSignal, HIGH);
+  //   digitalWrite(CurrentState, HIGH);
+  //   delay(10000);
+  //   digitalWrite(OutputSignal, LOW);
+  //   digitalWrite(CurrentState, LOW);
+  //   for (int thisSignal = 0; thisSignal < number; thisSignal++) {
+  //     mRegister[thisSignal] = 0;
+  //     Serial.println("clear");
+  //   }
+  // }
 }
 
 void loop() {
-  if (digitalRead(switches[0]) == HIGH && digitalRead(switches[1]) == LOW) {
-    Serial.println("This is mode 1");
-      multiple(2);
-        delay(500);
+
+    for(int n = 0; n < 3; n++){
+      Serial.print(digitalRead(mSensor[n]));
     }
-    else   if (digitalRead(switches[0]) == HIGH && digitalRead(switches[1]) == HIGH) {
-    Serial.println("This is mode 2");
-      multiple(3);
-        delay(500);
+
+    for(int n = 0; n < 3; n++){
+      Serial.print(mRegister[n]);
+    }
+
+  if (digitalRead(switches[1]) == LOW) {
+    Serial.println("This is mode 1");
+      modeNumebr = 2;
+        // delay(500);
+    }
+    else   if (digitalRead(switches[0]) == LOW) {
+    Serial.println("This is mode 3");
+            modeNumebr = 4;
+
+        // delay(500);
     }
     else {
-    Serial.println("This is mode 3");
-    delay(500);
-      multiple(4);
+    Serial.println("This is mode 2");
+    // delay(500);
+            modeNumebr = 3;
+
     }
+
+    multiple(modeNumebr);
+    // Serial.println();
 
 
 }
+
+boolean check_inputCondition(int number, int *arr){
+  for(int n = 0; n < number; n++){
+    if(arr[n] != 1){
+      return false;
+    }
+  }
+  return true;
+}
+
+
+
