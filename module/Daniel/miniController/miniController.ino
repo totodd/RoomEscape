@@ -9,7 +9,7 @@ int externalModule[4] = {2, 3, 4, 5};
 int OutputSignal = 10;  //External Control Pin (current using LED)
 int Reset = 11;   //External Reset (highest level)
 int CurrentState = 12;    //To indicate current state of this model, High: Working; LOW: Idel
-int switches[2] = {A6, A7};
+int switches[2] = {6,7};
 
 void setup() {
   Serial.begin(9600);
