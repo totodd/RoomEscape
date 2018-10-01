@@ -4,20 +4,20 @@
    Similarly, metal detection can also be used using this.
 */
 int number = 4;
-int mSensor[4] = {3, 4, 5, 6};
+int externalModule[4] = {2, 3, 4, 5};
 
-int OutputSignal = 2;  //External Control Pin (current using LED)
+int OutputSignal = 10;  //External Control Pin (current using LED)
 int Reset = 11;   //External Reset (highest level)
 int CurrentState = 12;    //To indicate current state of this model, High: Working; LOW: Idel
-int switches[2] = {9, 10};
+int switches[2] = {A6, A7};
 
 void setup() {
   Serial.begin(9600);
   for (int thisSignal = 0; thisSignal < number; thisSignal++) {
-    pinMode(mSensor[thisSignal], INPUT);
+    pinMode(externalModule[thisSignal], INPUT_PULLUP);
   }
   for (int thisswitch = 0; thisswitch < 2; thisswitch++) {
-    pinMode(switches[thisswitch], INPUT);
+    pinMode(switches[thisswitch], INPUT_PULLUP);
   }
   pinMode(OutputSignal, OUTPUT);
   pinMode(Reset, INPUT);
@@ -44,7 +44,7 @@ void multiple(int number) {
   int mRegister[number];
   for (int thisSignal = 0; thisSignal < number; thisSignal++) {
     check[thisSignal] = 1;
-    if (digitalRead(mSensor[thisSignal]) == HIGH) {
+    if (digitalRead(externalModule[thisSignal]) == HIGH) {
       mRegister[thisSignal] = 1;
       delay(100);
     }
@@ -85,8 +85,3 @@ void loop() {
 
 
 }
-
-
-
-
-
