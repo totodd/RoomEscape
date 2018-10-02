@@ -36,6 +36,7 @@ int Busy = 2;
 
 // This pin is used to send to main controller to controll the whole electornicity system, high means should off, low means should on
 int Relay = 9;
+int Lighting = 3;
 
 void setup () {
   Serial.begin (9600);
@@ -43,6 +44,7 @@ void setup () {
   mp3_set_volume (20);
   pinMode(Busy, INPUT);
   pinMode(Relay, OUTPUT);
+  pinMode(Lighting,OUTPUT);
 
 }
 
@@ -83,6 +85,7 @@ void lightingMode(int a) {
   if (lightingsoundTrigger == 1) {
     // Play the lighting sound
     mp3_play(11);
+    digitalWrite(Lighting,HIGH);
     Serial.println("This is lighting");
   }
 }
@@ -98,6 +101,7 @@ void lightingMode(int a) {
 void Tongyaomode(int a) {
   // Keep running this mode, until all 10 Tongyao is finished
   mp3_play(a + 1);
+
   Serial.print("This is TongYao");
   Serial.print(a);
   Serial.println();
@@ -105,11 +109,11 @@ void Tongyaomode(int a) {
 
   // Play the lighting
   while (LightingTime < FixedLightingTime) {
-    // The following two scentence need to work together to make it play again and again.
+          // The following two scentence need to work together to make it play again and again.
+              digitalWrite(Lighting,LOW);
     lightingMode(5000);
     lightingDuration = 0;
     LightingTime++;
-
     // When the first lighting finished, cut off the whole electroncity system (send signal to main controller)
     if (a == 0 && LightingTime == 2) {
       digitalWrite(Relay, HIGH);
