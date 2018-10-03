@@ -28,7 +28,7 @@
 #define SS_PIN        2         // Configurable, take a unused pin, only HIGH/LOW required, must be diffrent to SS 2
 #define modeSwitch 4
 
-#define MAX_NR_OF_CARDS  12
+#define MAX_NR_OF_CARDS  10
 
 #define output 6
 #define outputIndicator 6
@@ -36,27 +36,37 @@ byte count = 0;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
+String savedKey = "cardstor";
 boolean cardPresentState = false;
 boolean settingMode = false;
 String read_rfid;
 String cardStored[MAX_NR_OF_CARDS];
+String tempStored[MAX_NR_OF_CARDS];
 int storedCount = 0;
 int scanCount = 0;
 
 int ledState = LOW;
 boolean isBlinking = false;
 
+const String masterCardID = "80c57c89";
 
 unsigned long previousMillis = 0;        // will store last time LED was updated
-
+unsigned long previousMillisCard = 0;
 // constants won't change:
 const long interval = 500;
-/**
+const long flashinterval = 300;
+const long settingInterval = 3000;
+/**d
    Initialize.
 */
 void setup() {
+  Serial.begin(9600); // Initialize serial communications with the PC
+  while (!Serial);    // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
 
   delay(1000);
+
+
+
   pinMode(output, OUTPUT);
   pinMode(outputIndicator, OUTPUT);
 
@@ -65,10 +75,9 @@ void setup() {
   digitalWrite(outputIndicator, LOW);
   autoSetAddr();
 
-  // readSavedInfoROM();
 
-  Serial.begin(9600); // Initialize serial communications with the PC
-  while (!Serial);    // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
+  readSavedInfoROM();
+
 
   SPI.begin();        // Init SPI bus
   mfrc522.PCD_Init();   // Initiate MFRC522
@@ -83,8 +92,8 @@ void loop() {
   // if(digitalRead(modeSwitch) == 0){
   //   settingMode = !settingMode;
   // }
-  if (storedCount == 0) settingMode = true;
-  else settingMode = false;
+  // if (storedCount == 0) settingMode = true;
+  // else settingMode = false;
 
   Serial.print("Setting mode: ");
   Serial.print(settingMode);
@@ -94,75 +103,113 @@ void loop() {
 
   Serial.print(cardStored[0]);
   Serial.print(" card: ");
-  Serial.println(mfrc522.uid.size);
+  Serial.print(mfrc522.uid.size);
+  Serial.print(" card scanned id:");
+  Serial.print(read_rfid);
+  Serial.print(" scanned #:");
+  Serial.println(scanCount);
 
-  if(settingMode && !isBlinking) blinkLED();
-  if(!settingMode) stopBlink();
+
+
+  if (settingMode && !isBlinking) blinkLED();
+  if (!settingMode) stopBlink();
 
 
   if (settingMode) {
     // if (!isBlinking) blinkLED();
+    if (((millis() - previousMillisCard) >= settingInterval) && (storedCount > 0)) {
+      write_StringEE(MAX_NR_OF_CARDS, savedKey);
+      EEPROM.write((MAX_NR_OF_CARDS + 1) * 8 + 1, storedCount);
+      settingMode = false;
+    }
+
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
       Serial.println("card sensed");
 
+
       cardPresentState = true;
       dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+      if (read_rfid != masterCardID) {
 
 
-      if (!inArray(read_rfid, cardStored)) {
-        cardStored[storedCount] = read_rfid;
+        if (!inArray(read_rfid, cardStored)) {
+          cardStored[storedCount] = read_rfid;
 
-        write_StringEE(storedCount, read_rfid);
-        // EEPROM.write(storedCount, read_rfid);
-        storedCount++;
-      } else {
-        if (!inArray(read_rfid, cardStored)) waitAction();
-        else {
-          if (read_rfid == cardStored[scanCount]) {
-            scanCount++;
-            if (scanCount == storedCount) passAction();
-            else return;
-          } else {
-            scanCount = 0;
-          }
+          write_StringEE(storedCount, read_rfid);
+          // EEPROM.write(storedCount, read_rfid);
+          storedCount++;
+          flashLED();
+          previousMillisCard = millis();
+
         }
       }
-    }  else if (!mfrc522.PICC_ReadCardSerial()) {
-      cardPresentState = false;
-      waitAction();
-    }
-  } else {
-    // if (isBlinking) stopBlink();
-    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-      cardPresentState = true;
-      dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-      if (!inArray(read_rfid, cardStored)) waitAction();
-      else {
-        if (read_rfid == cardStored[scanCount]) {
-          scanCount++;
-          if (scanCount == storedCount) passAction();
-          else return;
-        } else {
-          scanCount = 0;
-        }
-      }
-    }  else if (!mfrc522.PICC_ReadCardSerial()) {
-      cardPresentState = false;
-      waitAction();
     }
   }
+  if (!settingMode) {
+    // if (isBlinking) stopBlink();
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
 
-  // Serial.println(cardPresentState);
-  delay(100);
+      cardPresentState = true;
+      dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+      //mastercard scanned
+      if (read_rfid == masterCardID) {
+        storedCount = 0;
+        scanCount = 0;
+        for (int n = 0; n < MAX_NR_OF_CARDS; n++) {
+          cardStored[n] = "";
+        }
+        read_rfid = "";
+        for (int n = 0; n < EEPROM.length(); n++) {
+          EEPROM.write(n, 0);
+        }
+        settingMode = true;
+        // setup();
+        digitalWrite(output, LOW);
+        digitalWrite(outputIndicator, LOW);
+      }
 
+      // check pass condition
+      if (!inArray(read_rfid, tempStored) && inArray(read_rfid, cardStored)) {
+        tempStored[scanCount] = read_rfid;
+        scanCount++;
+      }
+
+      //  else if (!mfrc522.PICC_ReadCardSerial()) {
+      //   cardPresentState = false;
+      //   waitAction();
+      // }
+    }
+    if(scanCount == storedCount && storedCount != 0){
+          if(isPassed()) passAction();
+          else {
+            scanCount = 0;
+            for(int n = 0; n < storedCount; n++){
+              tempStored[n] = "";
+            }
+          }
+    }
+
+    // Serial.println(cardPresentState);
+    delay(100);
+
+  }
 }
 
+boolean isPassed() {
+  for(int n = 0; n < storedCount; n++){
+    if(tempStored[n] != cardStored[n]) return false;
+  }
+  return true;
+}
 
 void passAction() {
   digitalWrite(output, HIGH);
   digitalWrite(outputIndicator, HIGH);
   delay(3000);
   scanCount = 0;
+  for(int n = 0; n < storedCount; n++){
+    tempStored[n] = "";
+  }
 }
 
 void waitAction() {
@@ -174,6 +221,15 @@ void waitAction() {
 
 void stopBlink() {
   digitalWrite(outputIndicator, LOW);
+}
+
+void flashLED() {
+  for (int n = 0; n < 3; n++) {
+    digitalWrite(outputIndicator, HIGH);
+    delay(flashinterval);
+    digitalWrite(outputIndicator, LOW);
+    delay(flashinterval);
+  }
 }
 
 void blinkLED() {
@@ -198,7 +254,20 @@ void blinkLED() {
 
 }
 
-boolean inArray(String id, String *array) {
+boolean array_cmp(String *a, String *b, int len_a, int len_b) {
+  int n;
+
+  //if their lengths are different, return false
+  if (len_a != len_b) return false;
+
+  //test each element to be the same. if not, return false
+  for (n = 0; n < len_a; n++) if (a[n] != b[n]) return false;
+
+  //ok, if we have not returned yet, they are equal :)
+  return true;
+}
+
+boolean inArray(String id, String * array) {
   for (int n = 0; n < storedCount; n++) {
 
     if (array[n] == id) {
@@ -208,7 +277,7 @@ boolean inArray(String id, String *array) {
   return false;
 }
 
-void dump_byte_array(byte *buffer, byte bufferSize) {
+void dump_byte_array(byte * buffer, byte bufferSize) {
   read_rfid = "";
   for (byte i = 0; i < bufferSize; i++) {
     read_rfid = read_rfid  + String(buffer[i], HEX);
@@ -259,32 +328,58 @@ void autoSetAddr() {
 
 }
 
-void readSavedInfoROM(){
-  int cnt = 0;
-  for (int n = 0; n < MAX_NR_OF_CARDS; n++) {
-    cardStored[n] =  read_StringEE(0, 8);//Read String starting a address 0 with given lenth of String
-
+void readSavedInfoROM() {
+  // int cnt = 0;
+  Serial.println("start reading rom");
+  // card is saved in ROM
+  if (read_StringEE(MAX_NR_OF_CARDS, 8) == savedKey) {
+    settingMode = false;
+    storedCount = EEPROM.read((MAX_NR_OF_CARDS + 1) * 8 + 1);
+    for (int n = 0; n < MAX_NR_OF_CARDS; n++) {
+      cardStored[n] = read_StringEE(n, 8);//Read String starting a address 0 with given lenth of String
+      Serial.println(cardStored[n]);
+    }
+  } else { //  card is not saved in ROM
+    settingMode = true;
   }
+
 }
 
 
+bool write_StringEE(int Addr, String input)
+{
+  char cbuff[input.length() + 1]; //Finds length of string to make a buffer
+  input.toCharArray(cbuff, input.length() + 1); //Converts String into character array
+  return eeprom_write_string(Addr, cbuff); //Saves String
+}
 
+String read_StringEE(int Addr, int length)
+{
+
+  char cbuff[length + 1];
+  boolean didget = eeprom_read_string(Addr * length, cbuff, length + 1);
+
+  String stemp(cbuff);
+  if (didget) {
+    Serial.print("got 1 from rom ");
+    Serial.print(Addr);
+    Serial.print("   ");
+    Serial.println(stemp);
+  }
+
+  return stemp;
+
+}
 /*
- Test code for writing a String to the EEPROM and then reading it Back
- Written by Mario Avenoso, M-tech Creations
- 4/10/16
+  Test code for writing a String to the EEPROM and then reading it Back
+  Written by Mario Avenoso, M-tech Creations
+  4/10/16
 */
-
-#include 
-
-const int EEPROM_MIN_ADDR = 0;
-const int EEPROM_MAX_ADDR = 511;
-
-
 
 //http://ediy.com.my/index.php/tutorials/item/68-arduino-reading-and-writing-string-to-eeprom
 
-
+const int EEPROM_MIN_ADDR = 0;
+const int EEPROM_MAX_ADDR = 511;
 
 // Returns true if the address is between the
 // minimum and maximum allowed values, false otherwise.
@@ -292,7 +387,7 @@ const int EEPROM_MAX_ADDR = 511;
 // This function is used by the other, higher-level functions
 // to prevent bugs and runtime errors due to invalid addresses.
 boolean eeprom_is_addr_ok(int addr) {
- return ((addr &gt;= EEPROM_MIN_ADDR) &amp;&amp; (addr &lt;= EEPROM_MAX_ADDR));
+  return ((addr >= EEPROM_MIN_ADDR) && (addr <= EEPROM_MAX_ADDR));
 }
 
 
@@ -301,21 +396,21 @@ boolean eeprom_is_addr_ok(int addr) {
 // Returns false if the start or end addresses aren't between
 // the minimum and maximum allowed values.
 // When returning false, nothing gets written to eeprom.
-boolean eeprom_write_bytes(int startAddr, const byte* array, int numBytes) {
- // counter
- int i;
+boolean eeprom_write_bytes(int startAddr, const byte * array, int numBytes) {
+  // counter
+  int i;
 
- // both first byte and last byte addresses must fall within
- // the allowed range
- if (!eeprom_is_addr_ok(startAddr) || !eeprom_is_addr_ok(startAddr + numBytes)) {
- return false;
- }
+  // both first byte and last byte addresses must fall within
+  // the allowed range
+  if (!eeprom_is_addr_ok(startAddr) || !eeprom_is_addr_ok(startAddr + numBytes)) {
+    return false;
+  }
 
- for (i = 0; i &lt; numBytes; i++) {
- EEPROM.write(startAddr + i, array[i]);
- }
+  for (i = 0; i < numBytes; i++) {
+    EEPROM.write(startAddr + i, array[i]);
+  }
 
- return true;
+  return true;
 }
 
 
@@ -325,12 +420,12 @@ boolean eeprom_write_bytes(int startAddr, const byte* array, int numBytes) {
 // If false is returned, nothing gets written to the eeprom.
 boolean eeprom_write_string(int addr, const char* string) {
 
- int numBytes; // actual number of bytes to be written
+  int numBytes; // actual number of bytes to be written
 
- //write the string contents plus the string terminator byte (0x00)
- numBytes = strlen(string) + 1;
+  //write the string contents plus the string terminator byte (0x00)
+  numBytes = strlen(string) + 1;
 
- return eeprom_write_bytes(addr, (const byte*)string, numBytes);
+  return eeprom_write_bytes(addr, (const byte*)string, numBytes);
 }
 
 
@@ -343,62 +438,46 @@ boolean eeprom_write_string(int addr, const char* string) {
 // - last eeprom address reached
 // - string terminator byte (0x00) encountered.
 boolean eeprom_read_string(int addr, char* buffer, int bufSize) {
- byte ch; // byte read from eeprom
- int bytesRead; // number of bytes read so far
+  byte ch; // byte read from eeprom
+  int bytesRead; // number of bytes read so far
 
- if (!eeprom_is_addr_ok(addr)) { // check start address
- return false;
- }
+  if (!eeprom_is_addr_ok(addr)) { // check start address
+    return false;
+  }
 
- if (bufSize == 0) { // how can we store bytes in an empty buffer ?
- return false;
- }
+  if (bufSize == 0) { // how can we store bytes in an empty buffer ?
+    return false;
+  }
 
- // is there is room for the string terminator only, no reason to go further
- if (bufSize == 1) {
- buffer[0] = 0;
- return true;
- }
+  // is there is room for the string terminator only, no reason to go further
+  if (bufSize == 1) {
+    buffer[0] = 0;
+    return true;
+  }
 
- bytesRead = 0; // initialize byte counter
- ch = EEPROM.read(addr + bytesRead); // read next byte from eeprom
- buffer[bytesRead] = ch; // store it into the user buffer
- bytesRead++; // increment byte counter
+  bytesRead = 0; // initialize byte counter
+  ch = EEPROM.read(addr + bytesRead); // read next byte from eeprom
+  buffer[bytesRead] = ch; // store it into the user buffer
+  bytesRead++; // increment byte counter
 
- // stop conditions:
- // - the character just read is the string terminator one (0x00)
- // - we have filled the user buffer
- // - we have reached the last eeprom address
- while ((ch != 0x00) &amp;&amp; (bytesRead &lt; bufSize) &amp;&amp; ((addr + bytesRead) &lt;= EEPROM_MAX_ADDR)) { // if no stop condition is met, read the next byte from eeprom ch = EEPROM.read(addr + bytesRead); buffer[bytesRead] = ch; // store it into the user buffer bytesRead++; // increment byte counter } // make sure the user buffer has a string terminator, (0x00) as its last byte if ((ch != 0x00) &amp;&amp; (bytesRead &gt;= 1)) {
- buffer[bytesRead - 1] = 0;
- }
+  // stop conditions:
+  // - the character just read is the string terminator one (0x00)
+  // - we have filled the user buffer
+  // - we have reached the last eeprom address
+  while ( (ch != 0x00) && (bytesRead < bufSize) && ((addr + bytesRead) <= EEPROM_MAX_ADDR) ) {
+    // if no stop condition is met, read the next byte from eeprom
+    ch = EEPROM.read(addr + bytesRead);
+    buffer[bytesRead] = ch; // store it into the user buffer
+    bytesRead++; // increment byte counter
+  }
 
- return true;
+  // make sure the user buffer has a string terminator, (0x00) as its last byte
+  if ((ch != 0x00) && (bytesRead >= 1)) {
+    buffer[bytesRead - 1] = 0;
+  }
+
+  return true;
 }
-
-//Takes in a String and converts it to be used with the EEPROM Functions
-//
-bool write_StringEE(int Addr, String input)
-{
- char cbuff[input.length() + 1];
- input.toCharArray(cbuff, input.length() + 1);
- return eeprom_write_string(Addr, cbuff);
-}
-
-//Given the starting address, and the length, this function will return
-//a String and not a Char array
-String read_StringEE(int Addr, int length)
-{
- 
- char cbuff[length+1];
- eeprom_read_string(Addr, cbuff, length+1);
- 
- String stemp(cbuff);
- return stemp;
- 
-}
-
-
 
 
 
