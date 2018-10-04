@@ -28,7 +28,7 @@ void Delay_button(int a){                                     // Parameter a ind
       duration = millis() - startTime; 
       if (duration >= a){
         digitalWrite(OutputSignal,HIGH);                       // If button is pressed over 5s, the external control output turn to HIGH
-        delay(1);
+        delay(10000);
         digitalWrite(OutputSignal,LOW);
       }
       else if (duration < a && duration >= debounceDelay){
