@@ -87,6 +87,10 @@ void lightingMode(int a) {
     mp3_play(11);
     digitalWrite(Lighting,HIGH);
     Serial.println("This is lighting");
+    Serial.println(digitalRead(Busy));
+    if (digitalRead(Busy) == HIGH){
+      digitalWrite(Lighting,LOW);
+    }
   }
 }
 
@@ -109,15 +113,14 @@ void Tongyaomode(int a) {
 
   // Play the lighting
   while (LightingTime < FixedLightingTime) {
-          // The following two scentence need to work together to make it play again and again.
-              digitalWrite(Lighting,LOW);
+   // The following two scentence need to work together to make it play again and again.
     lightingMode(5000);
     lightingDuration = 0;
     LightingTime++;
     // When the first lighting finished, cut off the whole electroncity system (send signal to main controller)
-    if (a == 0 && LightingTime == 2) {
-      digitalWrite(Relay, HIGH);
-    }
+    //if (a == 0 && LightingTime == 2) {
+      //digitalWrite(Relay, HIGH);
+    //}
   }
   LightingTime = 0;
 }
