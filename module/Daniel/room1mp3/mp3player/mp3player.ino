@@ -31,30 +31,34 @@ int currentTongYao = 0;
 // Number of Total Tong Yao
 int totalTongYao = 10;
 
-// This pin defines whether it is playing or not
-int Busy = 2;
-
 // This pin is used to send to main controller to controll the whole electornicity system, high means should off, low means should on
 int Electricity = 9;  // HIGH means cut off
 int Lighting = 3;
+
+// This defines how long the lighting should remain
+int lightingRemainTime = 2000;
+
+// This defines when the TongYao and Lighting should play.
+int StartTriger = 2;
 
 void setup () {
   Serial.begin (9600);
   mp3_set_serial (Serial);    //set Serial for DFPlayer-mini mp3 module
   mp3_set_volume (20);
-  pinMode(Busy, INPUT);
   pinMode(Electricity, OUTPUT);
-  pinMode(Lighting,OUTPUT);
+  pinMode(Lighting, OUTPUT);
+  pinMode(StartTriger, INPUT);
 
 }
 
 void loop() {
-  combination(5000);
-  while (1) {
-    lightingMode(5000);
-    lightingDuration = 0;
+  if (digitalRead(StartTriger) == HIGH) {
+    combination(5000);
+    while (1) {
+      lightingMode(5000);
+      lightingDuration = 0;
+    }
   }
-
 }
 
 
@@ -81,16 +85,14 @@ void lightingMode(int a) {
     lightingsoundTrigger = 1;
   }
 
-  // When reaches two minutes
+  // When reaches two minutes, lighting system
   if (lightingsoundTrigger == 1) {
     // Play the lighting sound
     mp3_play(11);
-    digitalWrite(Lighting,HIGH);
+    digitalWrite(Lighting, HIGH);
     Serial.println("This is lighting");
-    Serial.println(digitalRead(Busy));
-    if (digitalRead(Busy) == HIGH){
-      digitalWrite(Lighting,LOW);
-    }
+    delay(lightingRemainTime);
+    digitalWrite(Lighting, LOW);
   }
 }
 
@@ -113,20 +115,16 @@ void Tongyaomode(int a) {
 
   // Play the lighting
   while (LightingTime < FixedLightingTime) {
-   // The following two scentence need to work together to make it play again and again.
+    // The following two scentence need to work together to make it play again and again.
     lightingMode(5000);
     lightingDuration = 0;
     LightingTime++;
     // When the first lighting finished, cut off the whole electroncity system (send signal to main controller)
-<<<<<<< HEAD
-    //if (a == 0 && LightingTime == 2) {
-      //digitalWrite(Relay, HIGH);
-    //}
-=======
-    if (a == 0 && LightingTime == 2) {
+    if (a == 0 && LightingTime == 1) {
       digitalWrite(Electricity, HIGH);
+      delay(1000);
+      digitalWrite(Electricity,LOW);
     }
->>>>>>> d093badd7d67c84da3c2407316f064c9e227ab9f
   }
   LightingTime = 0;
 }
