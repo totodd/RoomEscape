@@ -35,7 +35,7 @@ int totalTongYao = 10;
 int Busy = 2;
 
 // This pin is used to send to main controller to controll the whole electornicity system, high means should off, low means should on
-int Relay = 9;
+int Electricity = 9;  // HIGH means cut off
 int Lighting = 3;
 
 void setup () {
@@ -43,7 +43,7 @@ void setup () {
   mp3_set_serial (Serial);    //set Serial for DFPlayer-mini mp3 module
   mp3_set_volume (20);
   pinMode(Busy, INPUT);
-  pinMode(Relay, OUTPUT);
+  pinMode(Electricity, OUTPUT);
   pinMode(Lighting,OUTPUT);
 
 }
@@ -118,9 +118,15 @@ void Tongyaomode(int a) {
     lightingDuration = 0;
     LightingTime++;
     // When the first lighting finished, cut off the whole electroncity system (send signal to main controller)
+<<<<<<< HEAD
     //if (a == 0 && LightingTime == 2) {
       //digitalWrite(Relay, HIGH);
     //}
+=======
+    if (a == 0 && LightingTime == 2) {
+      digitalWrite(Electricity, HIGH);
+    }
+>>>>>>> d093badd7d67c84da3c2407316f064c9e227ab9f
   }
   LightingTime = 0;
 }
