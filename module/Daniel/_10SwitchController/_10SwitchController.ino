@@ -21,7 +21,7 @@ Adafruit_SSD1306 display;
 
 
 // Declearation of 10 switchs
-int switchs[] = {2, 4, 3, 5, 6, 12, 8, 9, 10, 11};
+int switchs[] = {2, 3, 4, 5, 6, 8, 9, 10, 11, 12};
 int switchCount = 10;
 
 // Current pin input
@@ -35,8 +35,6 @@ int pinSetFlag = 0;
 // pin store address
 int addr = 0;
 
-// LED to show the action state, blink with 1s, means pin-setting succeed, blink quickly means pin incorrect
-int stateDisplay = A7;
 // Pin can only be set when this trigger is high
 int pinSetTrigger = A2;
 
@@ -57,7 +55,6 @@ void setup() {
     pinMode(switchs[thisSwitch], INPUT_PULLUP);
   }
   pinMode(externalSignal, OUTPUT);
-  pinMode(stateDisplay, OUTPUT);
   pinMode(pinSetTrigger, INPUT);
   initDisplay();
 }
@@ -199,4 +196,3 @@ void loop() {
 
 
 }
-
