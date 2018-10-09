@@ -54,7 +54,7 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 unsigned long previousMillisCard = 0;
 // constants won't change:
 const long interval = 500;
-const long flashinterval = 300;
+const long flashinterval = 80;
 const long settingInterval = 3000;
 /**d
    Initialize.
@@ -111,8 +111,8 @@ void loop() {
 
 
 
-  if (settingMode && !isBlinking) blinkLED();
-  if (!settingMode) stopBlink();
+  if (settingMode && storedCount == 0) digitalWrite(outputIndicator, HIGH);
+  if (!settingMode) digitalWrite(outputIndicator, LOW);
 
 
   if (settingMode) {
@@ -331,10 +331,16 @@ void autoSetAddr() {
 void readSavedInfoROM() {
   // int cnt = 0;
   Serial.println("start reading rom");
+  Serial.print("card saved?");
+  Serial.println(read_StringEE(MAX_NR_OF_CARDS, 8));
   // card is saved in ROM
   if (read_StringEE(MAX_NR_OF_CARDS, 8) == savedKey) {
     settingMode = false;
     storedCount = EEPROM.read((MAX_NR_OF_CARDS + 1) * 8 + 1);
+    Serial.print("cardCount from ROM: ");
+    Serial.println(storedCount);
+    
+    Serial.print("cards saved: ");
     for (int n = 0; n < MAX_NR_OF_CARDS; n++) {
       cardStored[n] = read_StringEE(n, 8);//Read String starting a address 0 with given lenth of String
       Serial.println(cardStored[n]);
@@ -342,7 +348,6 @@ void readSavedInfoROM() {
   } else { //  card is not saved in ROM
     settingMode = true;
   }
-
 }
 
 
@@ -350,14 +355,14 @@ bool write_StringEE(int Addr, String input)
 {
   char cbuff[input.length() + 1]; //Finds length of string to make a buffer
   input.toCharArray(cbuff, input.length() + 1); //Converts String into character array
-  return eeprom_write_string(Addr, cbuff); //Saves String
+  return eeprom_write_string(Addr*8, cbuff); //Saves String
 }
 
 String read_StringEE(int Addr, int length)
 {
 
   char cbuff[length + 1];
-  boolean didget = eeprom_read_string(Addr * length, cbuff, length + 1);
+  boolean didget = eeprom_read_string(Addr * 8, cbuff, length + 1);
 
   String stemp(cbuff);
   if (didget) {
@@ -478,6 +483,4 @@ boolean eeprom_read_string(int addr, char* buffer, int bufSize) {
 
   return true;
 }
-
-
 

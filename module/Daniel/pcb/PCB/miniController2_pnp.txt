@@ -1,0 +1,36 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=miniController2
+*Date=16:40:41
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;THT;9.64979;-6.73897;90;Bottom;10
+2;;;3.29978;-4.19906;0;Bottom;Hole6
+3;;THT;9.64979;-9.27897;90;Bottom;10
+4;;;46.4797;-4.19906;0;Bottom;Hole5
+5;;THT;17.2698;-6.73897;90;Bottom;12
+6;;THT;14.5792;-21.979;90;Bottom;GND1
+7;;THT;17.2698;-9.27897;90;Bottom;11
+8;;;3.29978;-52.459;0;Bottom;Hole7
+9;;THT;14.568;-51.4606;90;Bottom;s
+10;;THT;43.9398;-16.899;0;Bottom;switch1
+11;220;THT;12.028;-36.2206;0;Bottom;R2
+12;;THT;17.2698;-11.819;90;Bottom;10
+13;220;THT;12.028;-26.0606;0;Bottom;R3
+14;220;THT;12.0032;-16.899;0;Bottom;R4
+15;;THT;9.64979;-11.819;90;Bottom;10
+16;;;46.4797;-52.459;0;Bottom;Hole8
+17;220;THT;12.028;-46.3806;0;Bottom;R1
+18;;THT;14.568;-31.1406;90;Bottom;GND
+19;;THT;37.5898;-49.9189;90;Bottom;-
+20;;;31.2398;-24.5105;0;Bottom;SemiAngle
+21;;THT;14.568;-41.3006;90;Bottom;+
