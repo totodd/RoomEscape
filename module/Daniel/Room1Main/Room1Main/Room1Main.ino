@@ -1,7 +1,7 @@
 // Relay defination
 int illumination[5] = {22, 23, 24, 25, 26}; // Relay 1, 2, 3, 4, 5 LOW means lights on, illumination[4]---Relay 5 controls all illumination (1-8)
 int alarm = 27 ;                        // Relay 6   LOW means alarm on
-int door[7] = { 28, 29, 30, 31, 32, 33,34} ;// Relay 8, 9, 10, 11, 12, 13, 14  LOW means door open
+int door[7] = { 28, 29, 30, 31, 32, 33, 34} ; // Relay 8, 9, 10, 11, 12, 13, 14  LOW means door open
 
 
 // Constant number defination
@@ -10,14 +10,16 @@ int illuminationCount = 5;
 
 // Slave controller definaiton (INPUT)
 int blueWordSoundTriger = 2;
-int ElectricityCuteOffTriger = 3 ;
+int ElectricityCuteOffTriger = 10 ;
+int ElectricityReset = 11;
 int ExternalillunationTriger[4] = {4, 5, 6, 7};
-int TongYaoTriger = 8;
-int TongYaoPlay = 9;
 
 // Wireless Controller
-int wController[8] = {4,2,5,3,8,9,6,7};
+int wController[8] = {4, 2, 5, 3, 8, 9, 6, 7};
 
+
+// State Controll
+bool isPowerGenerated;
 
 void setup() {
   Serial.begin(9600);
@@ -26,22 +28,18 @@ void setup() {
   // Door define, initially, the door are all closed, when write to HIGH, realy stop works, door open
   for (int thisDoor = 0; thisDoor < doorCount; thisDoor ++) {
     pinMode(door[thisDoor], OUTPUT);
-    digitalWrite(door[thisDoor],LOW);
+    digitalWrite(door[thisDoor], LOW);
   }
 
   // Illumination define, initially, the illuminations are light up, when write to HIGH, relay stop, lights off.
   for (int thisillumination = 0; thisillumination < illuminationCount; thisillumination ++) {
     pinMode(illumination[thisillumination], OUTPUT);
-    digitalWrite(illumination[thisillumination],LOW);
+    digitalWrite(illumination[thisillumination], LOW);
   }
 
   // Alarm define, initially, the alarm turns off, when wirte to LOW, relay work, alarm sounds up.
   pinMode(alarm, OUTPUT);
-  digitalWrite(alarm,HIGH);
-
-  // TongYao play or not state define, initially, the state is LOW, when receive signal, turn to high, TongYao begin to play.
-    pinMode(TongYaoPlay, OUTPUT);
-    digitalWrite(TongYaoPlay, LOW);
+  digitalWrite(alarm, HIGH);
 
   // INPUT
   for (int thisexternalillumination = 0; thisexternalillumination < 4; thisexternalillumination ++) {
@@ -52,40 +50,37 @@ void setup() {
   }
   pinMode(blueWordSoundTriger, INPUT);
   pinMode(ElectricityCuteOffTriger, INPUT);
-  pinMode(TongYaoTriger, INPUT_PULLUP);
+  pinMode(ElectricityReset,INPUT);
+
+  // State Control
+  isPowerGenerated = false;
 }
 
 void loop() {
-  Serial.println(digitalRead(TongYaoPlay));
-  /*if (digitalRead(TongYaoTriger) == HIGH){
-    digitalWrite(TongYaoPlay,HIGH);
-    }
-    if (digitalRead(ElectricityCuteOffTriger) == HIGH) {
-    electricityCutOff();
-    Serial.println("Begin to cutoff power");
-    delay(5000); //need to be replaced with power generator
-    electricityOn();
-    }*/
 
-  /*for (int thisexternalillumination = 0; thisexternalillumination < 4; thisexternalillumination ++) {
-    if( digitalRead(ExternalillunationTriger[thisexternalillumination]) == HIGH){
-      illumination[thisexternalillumination] =HIGH;
-    }
-    }*/
-
-
-    // Door controller
+//Serial.println(digitalRead(ElectricityReset));
+  // Door controller
   for (int thiswController = 0; thiswController < 5; thiswController ++) {
     int controlSignal = digitalRead(wController[thiswController]);
-    if (controlSignal == HIGH){
+    if (controlSignal == HIGH) {
       openSpecificDoor(thiswController);
     }
   }
 
-  // Triger to play TongYao
-  if (digitalRead(wController[6]) == HIGH){
-    digitalWrite(TongYaoPlay,HIGH);
+  // After first lighting, electricity cut off
+  if (digitalRead(ElectricityCuteOffTriger) == HIGH) {
+    electricityCutOff();
+    Serial.println("electricity off");
   }
+
+  // After Electricity generation, electricity reset
+  if (digitalRead(ElectricityReset) == HIGH && isPowerGenerated == false){
+    electricityOn();
+    Serial.println("electricity ON");
+    isPowerGenerated = true;
+  }
+
+
 
 }
 
@@ -126,15 +121,16 @@ void blueWordOFF() {
 
 // Electricity cut off
 void electricityCutOff() {
-  digitalWrite(illumination[4], LOW);
+  digitalWrite(illumination[4], HIGH);
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], HIGH);
   }
+  Serial.println("Electricity off");
 }
 
 // Electricity on
 void electricityOn() {
-  digitalWrite(illumination[4], HIGH);
+  digitalWrite(illumination[4], LOW);
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], LOW);
   }
