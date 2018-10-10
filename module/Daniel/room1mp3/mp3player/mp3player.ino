@@ -47,12 +47,13 @@ void setup () {
   mp3_set_volume (20);
   pinMode(Electricity, OUTPUT);
   pinMode(Lighting, OUTPUT);
-  pinMode(StartTriger, INPUT);
+  pinMode(StartTriger, INPUT_PULLUP);
+  digitalWrite(StartTriger,LOW);
 
 }
 
 void loop() {
-  if (digitalRead(StartTriger) == HIGH) {
+if (digitalRead(StartTriger) == HIGH) {
     combination(5000);
     while (1) {
       lightingMode(5000);
