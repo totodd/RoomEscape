@@ -107,16 +107,16 @@ void openSpecificDoor(int a) {
 
 // blueWordOn
 void blueWordON() {
-  digitalWrite(illumination[4], LOW);
-  digitalWrite(alarm, HIGH);
-  digitalWrite(blueWordSoundTriger, HIGH);
+  digitalWrite(illumination[4], HIGH);
+  digitalWrite(alarm, LOW);
+  //digitalWrite(blueWordSoundTriger, HIGH);
 }
 
 // blueWordOn
 void blueWordOFF() {
-  digitalWrite(illumination[4], HIGH);
-  digitalWrite(alarm, LOW);
-  digitalWrite(blueWordSoundTriger, LOW);
+  digitalWrite(illumination[4], LOW);
+  digitalWrite(alarm, HIGH);
+ // digitalWrite(blueWordSoundTriger, LOW);
 }
 
 // Electricity cut off
