@@ -21,22 +21,22 @@ Adafruit_SSD1306 display;
 
 
 // Declearation of 10 switchs
-int switchs[] = {2, 3, 4, 5, 6, 7, 8, 11, 12, 10};
-int switchCount = 10;
+int switchs[] = {2, 3, 4, 5, 10, 11};
+int switchCount = 6;
 
 // Current pin input
-int currentPin[10];
+int currentPin[6];
 // Saved pre-setting pin
-int presetPin[10];
+int presetPin[6];
 // Used to send external signal
-int externalSignal = 9;
+int externalSignal = 12;
 // used to detect whether it is in pin set mode
 int pinSetFlag = 0;
 // pin store address
 int addr = 0;
 
 // Pin can only be set when this trigger is high
-int pinSetTrigger = A1;
+int pinSetTrigger = 7;
 
 
 void initDisplay() {
@@ -121,7 +121,7 @@ void showTextPlayMode(String s) {
 
 // To check Pin is correct
 void pinMatchCheck() {
-  if (array_cmp(currentPin, presetPin, 10, 10) == true) {
+  if (array_cmp(currentPin, presetPin, 6, 6) == true) {
     Serial.println("Pin Matched");
     digitalWrite(externalSignal, HIGH);
     delay(10000);
@@ -165,7 +165,7 @@ void PinConfiguration() {
 
   // pre setting pin display
   //Serial.println("The presetting pin is ");
-  for (int thisaddr = 0; thisaddr < 10; thisaddr++) {
+  for (int thisaddr = 0; thisaddr < 6; thisaddr++) {
     presetPin[thisaddr] = EEPROM.read(thisaddr);
     Serial.print(EEPROM.read(thisaddr));
 
@@ -178,7 +178,6 @@ void PinConfiguration() {
 void loop() {
 
   PinConfiguration();
-
   if (digitalRead(pinSetTrigger) == HIGH) {
     Serial.println("pin set mode");
     showText("Pin Set");
@@ -191,7 +190,7 @@ void loop() {
       pinSetFlag = 0;
     }
     Serial.println("Play mode");
-    showTextPlayMode(String(currentPin[0]) + String(currentPin[1]) + String(currentPin[2]) + String(currentPin[3]) + String(currentPin[4]) + String(currentPin[5]) + String(currentPin[6]) + String(currentPin[7]) + String(currentPin[8]) + String(currentPin[9]));
+    showTextPlayMode(String(currentPin[0]) + String(currentPin[1]) + String(currentPin[2]) + String(currentPin[3]) + String(currentPin[4]) + String(currentPin[5]));
     pinMatchCheck();
 
   }
