@@ -53,6 +53,7 @@ void setup () {
 }
 
 void loop() {
+  Serial.println(digitalRead(Lighting));
 if (digitalRead(StartTriger) == HIGH) {
     combination(5000);
     while (1) {

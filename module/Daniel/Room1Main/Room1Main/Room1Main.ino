@@ -1,7 +1,7 @@
 // Relay defination
 int illumination[5] = {22, 23, 24, 25, 26}; // Relay 1, 2, 3, 4, 5 LOW means lights on, illumination[4]---Relay 5 controls all illumination (1-8)
 int alarm = 27 ;                        // Relay 6   LOW means alarm on
-int door[7] = { 28, 29, 30, 31, 32, 33, 34} ; // Relay 8, 9, 10, 11, 12, 13, 14  LOW means door open
+int door[7] = { 28, 29, 30, 31, 32, 33, 34} ; // Relay 7, 8, 9, 10, 11, 12, 13  LOW means door open
 
 
 // Constant number defination
@@ -9,13 +9,13 @@ int doorCount = 7;
 int illuminationCount = 5;
 
 // Slave controller definaiton (INPUT)
-int blueWordSoundTriger = 2;
-int ElectricityCuteOffTriger = 10 ;
-int ElectricityReset = 11;
-int ExternalillunationTriger[4] = {4, 5, 6, 7};
+int blueWordSoundTriger = 11;
+int ElectricityCuteOffTriger = 12 ;
+int ElectricityReset = 13;
+int ExternalillunationTriger[4] = {14, 15, 16, 17};
 
 // Wireless Controller
-int wController[8] = {4, 2, 5, 3, 8, 9, 6, 7};
+int wController[8] = {4,2,5,3, 9,7,10,8};
 
 
 // State Controll
@@ -57,6 +57,9 @@ void setup() {
 }
 
 void loop() {
+//for (int i = 0; i < 8;i++){
+  //Serial.print(digitalRead(wController[i]));
+//}
 
 //Serial.println(digitalRead(ElectricityReset));
   // Door controller
@@ -70,9 +73,8 @@ void loop() {
   // After first lighting, electricity cut off
   if (digitalRead(ElectricityCuteOffTriger) == HIGH) {
     electricityCutOff();
-    Serial.println("electricity off");
   }
-
+Serial.println(digitalRead(ElectricityReset));
   // After Electricity generation, electricity reset
   if (digitalRead(ElectricityReset) == HIGH && isPowerGenerated == false){
     electricityOn();
@@ -125,7 +127,7 @@ void electricityCutOff() {
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], HIGH);
   }
-  Serial.println("Electricity off");
+  //Serial.println("Electricity off");
 }
 
 // Electricity on

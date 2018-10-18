@@ -9,7 +9,8 @@
 #define mSensor4 5
 
 
-#define OutputSignal  10  //External Control Pin (current using LED)
+#define OutputSignal1  10  //External Control Pin (current using LED)
+#define OutputSignal2 11
 #define Reset  A1   //External Reset (highest level)
 #define CurrentState  12    //To indicate current state of this model, High: Working; LOW: Idel
 #define switches1 6
@@ -30,9 +31,11 @@ void setup() {
   for (int thisswitch = 0; thisswitch < 2; thisswitch++) {
     pinMode(switches[thisswitch], INPUT_PULLUP);
   }
-  pinMode(OutputSignal, OUTPUT);
+  pinMode(OutputSignal1, OUTPUT);
+  pinMode(OutputSignal2,OUTPUT);
   pinMode(Reset, INPUT);
   pinMode(CurrentState, OUTPUT);
+  digitalWrite(OutputSignal2,HIGH);
 }
 
 
@@ -43,14 +46,16 @@ void multiple(int number) {
     if (digitalRead(mSensor[n]) == HIGH) mRegister[n] = 1;
   }
   if (check_inputCondition(number, mRegister)) {
-    digitalWrite(OutputSignal, HIGH);
+    digitalWrite(OutputSignal1, HIGH);
+    digitalWrite(OutputSignal2,LOW);
     delay(10000);
     for (int n = 0; n < number; n++) {
       mRegister[n] = 0;
     }
 
   } else {
-    digitalWrite(OutputSignal, LOW);
+    digitalWrite(OutputSignal1, LOW);
+    digitalWrite(OutputSignal2,HIGH);
   }
 }
 
@@ -65,11 +70,11 @@ void multiple(int number) {
 
   void loop() {
 
-    for (int n = 0; n < 2; n++) {
+    for (int n = 0; n < 3; n++) {
       Serial.print(digitalRead(mSensor[n]));
     }
 
-    for (int n = 0; n < 2; n++) {
+    for (int n = 0; n < 3; n++) {
       Serial.print(mRegister[n]);
     }
     Serial.println();
