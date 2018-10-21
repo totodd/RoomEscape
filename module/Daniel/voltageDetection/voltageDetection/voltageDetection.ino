@@ -1,5 +1,5 @@
 int analogpin=0;              //定义analogpin为模拟口0    
-int ExternalSignal = 13;           
+int ExternalSignal = 2;           
 int val,val5;                     //定义变量val,val5
 int val2=0;                     //定义变量val2
 int val3=0;                     //定义变量val3

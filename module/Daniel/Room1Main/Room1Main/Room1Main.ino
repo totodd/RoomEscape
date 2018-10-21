@@ -57,9 +57,9 @@ void setup() {
 }
 
 void loop() {
-//for (int i = 0; i < 8;i++){
-  //Serial.print(digitalRead(wController[i]));
-//}
+for (int i = 0; i < 8;i++){
+  Serial.print(digitalRead(wController[i]));
+}
 
 //Serial.println(digitalRead(ElectricityReset));
   // Door controller
@@ -127,7 +127,7 @@ void electricityCutOff() {
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], HIGH);
   }
-  //Serial.println("Electricity off");
+  Serial.println("Electricity off");
 }
 
 // Electricity on
@@ -136,4 +136,5 @@ void electricityOn() {
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], LOW);
   }
+  Serial.println("Electricity reset");
 }
