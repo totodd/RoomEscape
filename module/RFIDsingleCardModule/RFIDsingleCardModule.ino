@@ -31,7 +31,7 @@
 #define MAX_NR_OF_CARDS  10
 
 #define output 6
-#define outputIndicator 6
+#define outputIndicator 7
 byte count = 0;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.

@@ -1,0 +1,30 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=RFID sketch 2.0
+*Date=08:42:05
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;THT;4.48658;-26.2516;0;Bottom;J6
+2;;led-0603;6.51859;-35.7646;0;Top;LED2
+3;;;7.93789;-16.5336;90;Bottom;TXT1
+4;;;8.08206;-27.0241;90;Bottom;TXT2
+5;;;6.49068;-34.4311;0;Bottom;TXT3
+6;;;2.24519;-50.2546;0;Bottom;Hole4
+7;;;4.69592;-27.3267;90;Bottom;TXT5
+8;;;19.2186;-24.8462;0;Bottom;Part1
+9;;;36.9985;-7.07473;0;Bottom;Via1
+10;;;39.5385;-1.99473;0;Bottom;Hole1
+11;;SIP (Single Inline) [THT];36.9986;-26.1246;0;Bottom;U1
+12;;;39.5385;-50.2546;0;Bottom;Hole2
+13;;0603-res;6.51859;-39.2446;90;Top;Z1
+14;;;2.22648;-1.99473;0;Bottom;Hole3
+15;;;4.53522;-13.0386;90;Bottom;TXT4

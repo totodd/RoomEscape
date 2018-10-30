@@ -1,0 +1,52 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=masterReader2.0
+*Date=08:27:24
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;3.04055;-68.2556;0;Bottom;Hole4
+2;;;86.8605;-68.2556;0;Bottom;Hole1
+3;;;30.3572;-53.2965;0;Bottom;TXT3
+4;;THT;80.3836;-14.3024;-90;Bottom;J21
+5;;0603-res;43.6804;-52.1656;90;Top;Z4
+6;;led-0603;78.4906;-58.0956;-90;Top;LED2
+7;;;11.0405;-58.8688;0;Bottom;TXT3
+8;;;53.8405;-55.5556;0;Bottom;Via4
+9;;;3.04055;-2.21572;0;Bottom;Hole3
+10;;THT;57.5236;-20.5553;-90;Bottom;J23
+11;;;11.1205;-15.4801;0;Bottom;Grove1
+12;;THT;80.3836;-47.3739;-90;Bottom;J1
+13;;THT;57.5236;-27.2188;-90;Bottom;J25
+14;;;30.9806;-30.1472;0;Bottom;Part1
+15;;;86.8606;-2.21562;0;Bottom;Hole2
+16;;;59.8756;-63.2748;0;Bottom;TXT1
+17;;THT;80.3836;-20.9044;-90;Bottom;J18
+18;;THT;57.5236;-47.4256;-90;Bottom;J19
+19;;THT;80.3836;-27.5064;-90;Bottom;J16
+20;220;0603 [SMD];4.68055;-31.5457;-90;Bottom;R4
+21;;THT;57.5236;-13.9532;-90;Bottom;J24
+22;;;8.4063;-54.0951;180;Bottom;Power plug1
+23;;;57.6256;-8.75983;0;Bottom;TXT1
+24;;;56.3805;-68.2556;0;Bottom;Via3
+25;220;0603 [SMD];14.8406;-31.5457;-88;Bottom;R3
+26;;;23.3605;-55.5556;0;Bottom;Via2
+27;;0603-res;70.7706;-58.0956;180;Top;Z2
+28;220;0603 [SMD];12.3006;-31.5457;-90;Bottom;R2
+29;;THT;57.5236;-33.8208;-90;Bottom;J22
+30;;THT;80.3836;-34.1084;-90;Bottom;J17
+31;;THT;80.3836;-40.7718;-90;Bottom;J15
+32;;THT;57.5236;-40.8236;-90;Bottom;J20
+33;;;15.7405;-25.0757;0;Bottom;Via1
+34;;tactile-pth;46.9318;-60.915;0;Bottom;S1
+35;;THT;3.04055;-18.7256;0;Bottom;S3
+36;;THT;60.1906;-60.6356;90;Bottom;J14
+37;;;41.6471;-41.335;0;Bottom;TXT2
