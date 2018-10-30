@@ -57,11 +57,8 @@ void setup() {
 }
 
 void loop() {
-for (int i = 0; i < 8;i++){
-  Serial.print(digitalRead(wController[i]));
-}
 
-//Serial.println(digitalRead(ElectricityReset));
+Serial.println(digitalRead(ElectricityReset));
   // Door controller
   for (int thiswController = 0; thiswController < 5; thiswController ++) {
     int controlSignal = digitalRead(wController[thiswController]);
