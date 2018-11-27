@@ -13,6 +13,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <EEPROM.h>
 
 
 #define ICPIN_1 2
@@ -49,14 +50,22 @@ int count;
 int tapCount;
 int slaveArray[MAX_NR_OF_SLAVES];
 int targetSequence[MAX_NR_OF_SLAVES];
-
+int temp[MAX_NR_OF_SLAVES];
+int countAddr = 1;
+int savedAddr = 0;
 void setup() {
   Serial.begin (9600);
-  count = 0;
   tapCount = 0;
 
   initDisplay();
-  scanSlaves();
+  // scanSlaves();
+
+  if(EEPROM.read(savedAddr) == 1){
+    count = EEPROM.read(countAddr);
+  }else{
+    count = 1;
+  }
+
 
   pinMode(rst, INPUT);
   pinMode(output, OUTPUT);
@@ -65,13 +74,12 @@ void setup() {
   for (int i = 0; i < MAX_NR_OF_SLAVES; i++) {
     pinMode(ICpins[i], INPUT);
   }
-  
-  delay(1000);
+
 
   for (int i = 0; i < count; i++) {
     targetSequence[i] = i;
   }
-
+  copy(targetSequence,temp, MAX_NR_OF_SLAVES);
 }
 
 int reading[MAX_NR_OF_SLAVES];
@@ -82,7 +90,15 @@ String mode = "seq";
 
 //------------------loop ----------------
 void loop() {
-  if(digitalRead(rst)) resetProgram();
+  boolean buttonPressed = digitalRead(rst);
+
+  if(buttonPressed){
+    if(count < 12)count++;
+    else count = 1;
+    EEPROM.write(countAddr, count);
+    EEPROM.write(savedAddr, 1);
+  }
+
 
   if(digitalRead(MODE_SWITCH)) mode = "seq";
   else mode = "all";
@@ -110,6 +126,11 @@ void resetProgram(){
 
 void resetSequnce() {
   tapCount = 0;
+  copy(targetSequence,temp, MAX_NR_OF_SLAVES) ;
+}
+
+void copy(int* src, int* dst, int len) {
+    memcpy(dst, src, sizeof(src[0])*len);
 }
 
 boolean checkSequence(int i, int tapCount) {
@@ -138,18 +159,50 @@ void allinModeProcess() {
   }
 }
 
+void removePin(int i, int array[MAX_NR_OF_SLAVES]){
+  int tmp[MAX_NR_OF_SLAVES];
+  int cnt = 0;
+  for(int ind = 0; ind < (count - tapCount); ind++){
+    if(i != array[ind]){
+      tmp[cnt] = array[ind];
+      cnt++;
+    }
+  }
+  copy(tmp, array, MAX_NR_OF_SLAVES);
+}
+
 void sequenceModeProcess() {
-  for (int i = 0; i < count; i++) {
-    int input = digitalRead(ICpins[i]);
+  if(tapCount == count) passAction();
+  Serial.printf("tapCount = %d \n", tapCount );
+  Serial.printf("count = %d \n", count );
+  Serial.print("targetSequence");
+  for(int i = 0; i < MAX_NR_OF_SLAVES; i++)
+  {
+    Serial.print(targetSequence[i]);
+  }
+  for(int i = 0; i < MAX_NR_OF_SLAVES; i++)
+  {
+    Serial.print(temp[i]);
+  }
+
+  for (int i = 0; i < (count - tapCount); i++) {
+    int cardNumber = temp[i];
+    int input = digitalRead(ICpins[cardNumber]);
     if (input == 1) {
-      if (checkSequence(i, tapCount)) {
-        if (tapCount == (count - 1)) return passAction();
-        else {
-          sequence[tapCount] = i;
-          tapCount++;
-        }
+      if(cardNumber == targetSequence[tapCount]){
+        removePin(i, temp);
+        tapCount++;
+      }else{
+        resetSequnce();
       }
-      else resetSequnce();
+      // if (checkSequence(i, tapCount)) {
+      //   if (tapCount == (count)) return passAction();
+      //   else {
+      //     sequence[tapCount] = i;
+      //     tapCount++;
+      //   }
+      // }
+      // else resetSequnce();
     }
   }
 }
@@ -229,8 +282,3 @@ void showText(String s) {
   display.display();
   // delay(1);
 }
-
-
-
-
-
