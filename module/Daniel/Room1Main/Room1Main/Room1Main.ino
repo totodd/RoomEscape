@@ -48,7 +48,7 @@ void setup() {
   // Illumination define, initially, the illuminations are light up, when write to HIGH, relay stop, lights off.
   for (int thisillumination = 0; thisillumination < illuminationCount; thisillumination ++) {
     pinMode(illumination[thisillumination], OUTPUT);
-    //digitalWrite(illumination[thisillumination], LOW);
+    digitalWrite(illumination[thisillumination], HIGH);
   }
 
   // Alarm define, initially, the alarm turns off, when wirte to LOW, relay work, alarm sounds up.
@@ -80,7 +80,7 @@ void setup() {
 void loop() {
 
   // Initially, the room is in dark
-  digitalWrite(illumination[4], HIGH);
+  //digitalWrite(illumination[4], HIGH);
   // Door controller (The first 5 doors)
   for (int thiswController = 0; thiswController < 5; thiswController ++) {
     int controlSignal = digitalRead(wController[thiswController]);
