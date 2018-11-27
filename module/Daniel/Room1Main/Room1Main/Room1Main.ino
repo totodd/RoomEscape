@@ -3,9 +3,9 @@
 */
 
 // Relay defination
-int illumination[5] = {22, 23, 24, 25, 26}; // Relay 1, 2, 3, 4, 5 LOW means lights on, illumination[4]---Relay 5 controls all illumination (1-8)
-int alarm = 27 ;                        // Relay 6   LOW means alarm on
-int door[7] = { 28, 29, 30, 31, 32, 33, 34} ; // Relay 7, 8, 9, 10, 11, 12, 13  LOW means door open
+int illumination[5] = {22, 23, 24, 25, 26}; // Relay 1, 2, 3, 4, 5 HIGH means Relay on (lights on), illumination[4]---Relay 5 controls all illumination (1-8)
+int alarm = 27 ;                        // Relay 6   HIGH means Relay on
+int door[7] = { 28, 29, 30, 31, 32, 33, 34} ; // Relay 7, 8, 9, 10, 11, 12, 13  HIGH means Relay on
 
 
 // Constant number defination
@@ -39,21 +39,21 @@ bool isPowerGenerated;
 void setup() {
   Serial.begin(9600);
 
-  // Door define, initially, the door are all closed, when write to HIGH, relay stop working, door open
+  // Door define, initially, the door are all closed, when write to HIGH, relay start working, door open
   for (int thisDoor = 0; thisDoor < doorCount; thisDoor ++) {
     pinMode(door[thisDoor], OUTPUT);
-    //digitalWrite(door[thisDoor], LOW);
+    digitalWrite(door[thisDoor], LOW);
   }
 
-  // Illumination define, initially, the illuminations are light up, when write to HIGH, relay stop, lights off.
+  // Illumination define, initially, the illuminations are light off, when write to HIGH, relay start working, lights on.
   for (int thisillumination = 0; thisillumination < illuminationCount; thisillumination ++) {
     pinMode(illumination[thisillumination], OUTPUT);
-    digitalWrite(illumination[thisillumination], HIGH);
+    digitalWrite(illumination[thisillumination], LOW);
   }
 
-  // Alarm define, initially, the alarm turns off, when wirte to LOW, relay work, alarm sounds up.
+  // Alarm define, initially, the alarm turns off, when wirte to HIGH, relay work, alarm sounds up.
   pinMode(alarm, OUTPUT);
-  digitalWrite(alarm, HIGH);
+  digitalWrite(alarm, LOW);
 
   // INPUT
   for (int thisexternalillumination = 0; thisexternalillumination < 4; thisexternalillumination ++) {
@@ -79,8 +79,6 @@ void setup() {
 */
 void loop() {
 
-  // Initially, the room is in dark
-  //digitalWrite(illumination[4], HIGH);
   // Door controller (The first 5 doors)
   for (int thiswController = 0; thiswController < 5; thiswController ++) {
     int controlSignal = digitalRead(wController[thiswController]);
@@ -102,7 +100,7 @@ void loop() {
     secondMP3_blueword_Count++;
   }
   if (secondMP3_blueword_Count == 1) {
-    digitalWrite(illumination[4], LOW);
+    digitalWrite(illumination[4], HIGH);
     Serial.println("illumination system on");
   }
   else if (secondMP3_blueword_Count == 2) {
@@ -181,21 +179,21 @@ void openSpecificDoor(int a) {
 
 // blueWordOn
 void blueWordON() {
-  digitalWrite(illumination[4], HIGH);
-  digitalWrite(alarm, LOW);
+  digitalWrite(illumination[4], LOW);
+  digitalWrite(alarm, HIGH);
   digitalWrite(blueWordSoundTriger, HIGH);
 }
 
 // blueWordOn
 void blueWordOFF() {
-  digitalWrite(illumination[4], LOW);
-  digitalWrite(alarm, HIGH);
+  digitalWrite(illumination[4], HIGH);
+  digitalWrite(alarm, LOW);
   digitalWrite(blueWordSoundTriger, LOW);
 }
 
 // Electricity cut off
 void electricityCutOff() {
-  digitalWrite(illumination[4], HIGH);
+  digitalWrite(illumination[4], LOW);
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], HIGH);
   }
@@ -204,7 +202,7 @@ void electricityCutOff() {
 
 // Electricity on
 void electricityOn() {
-  digitalWrite(illumination[4], LOW);
+  digitalWrite(illumination[4], HIGH);
   for (int thisdoor = 0; thisdoor < 3; thisdoor ++) {
     digitalWrite(door[thisdoor], LOW);
   }
