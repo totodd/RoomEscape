@@ -6,15 +6,15 @@
 #define mSensor1 2
 #define mSensor2 3
 #define mSensor3 4
-#define mSensor4 5
+#define mSensor4 7  
 
 
 #define OutputSignal1  10  //External Control Pin (current using LED)
 #define OutputSignal2 11
 #define Reset  A1   //External Reset (highest level)
 #define OutputSignal3  12    //To indicate current state of this model, High: Working; LOW: Idel
-#define switches1 6
-#define switches2 7
+#define switches1 8
+#define switches2 9
 
 
 int mSensor[] = {mSensor1, mSensor2, mSensor3, mSensor4};
@@ -42,8 +42,8 @@ void setup() {
 
 void multiple(int number) {
 
-  for (int n = 1; n < number; n++) {
-    if (digitalRead(mSensor[n]) == HIGH) mRegister[n] = 1;
+  for (int n = 0; n < number; n++) {
+    if (digitalRead(mSensor[n]) == LOW) mRegister[n] = 1;
   }
   if (check_inputCondition(number, mRegister)) {
     digitalWrite(OutputSignal1, HIGH);
@@ -72,16 +72,16 @@ void multiple(int number) {
 
   void loop() {
 
-    for (int n = 0; n < 3; n++) {
+    for (int n = 0; n < 4; n++) {
       Serial.print(digitalRead(mSensor[n]));
     }
 
-    for (int n = 0; n < 3; n++) {
+    for (int n = 0; n < 4; n++) {
       Serial.print(mRegister[n]);
     }
     Serial.println();
 
-    if (digitalRead(switches[1]) == LOW) {
+    /*if (digitalRead(switches[1]) == LOW) {
       Serial.println("This is mode 1");
       modeNumebr = 2;
     }
@@ -93,7 +93,7 @@ void multiple(int number) {
       Serial.println("This is mode 2");
       modeNumebr = 3;
 
-    }
+    }*/
     
-    multiple(modeNumebr);
+    multiple(4);
   }

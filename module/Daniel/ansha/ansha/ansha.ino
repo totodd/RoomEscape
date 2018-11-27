@@ -38,7 +38,7 @@ void setup() {
   for (int i = 0; i<3;i++){
     pinMode(WController[i],INPUT);
   }
-  pinMode(MSensor1,INPUT_PULLUP);
+  pinMode(MSensor1,INPUT);
   pinMode(MSensor2,INPUT_PULLUP);
 
 
@@ -58,7 +58,7 @@ void loop() {
     Serial.print(check[i]);
   }
   Serial.println();*/
-  Serial.println(digitalRead(doorcheck));
+  Serial.println(digitalRead(MSensor1));
   
 
   // Controll the telephone and door
