@@ -107,7 +107,7 @@ void loop() {
   }
   else if (secondMP3_blueword_Count == 2) {
     Serial.println("Second MP3 player play music");
-    digitalWrite(secondMP3Triger, HIGH);
+    digitalWrite(blueWordSoundTriger, HIGH);
   }
   else {
     if (secondMP3_blueword_Count % 2 == 1) {
