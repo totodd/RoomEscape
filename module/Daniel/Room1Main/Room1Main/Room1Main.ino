@@ -1,6 +1,6 @@
 /*
- * Part A: This is the variable defination part, which decleared all variables
- */
+   Part A: This is the variable defination part, which decleared all variables
+*/
 
 // Relay defination
 int illumination[5] = {22, 23, 24, 25, 26}; // Relay 1, 2, 3, 4, 5 LOW means lights on, illumination[4]---Relay 5 controls all illumination (1-8)
@@ -12,7 +12,7 @@ int door[7] = { 28, 29, 30, 31, 32, 33, 34} ; // Relay 7, 8, 9, 10, 11, 12, 13  
 int doorCount = 7;
 int illuminationCount = 5;
 int secondMP3_blueword_Count = 0;         // used to record the control button pressed, 1 means second MP3 start play the
-                                          // pre-setting sound, even number means start blueword mode, odd means exist the mode
+// pre-setting sound, even number means start blueword mode, odd means exist the mode
 
 
 // Slave controller definaiton (INPUT & OUTPUT)
@@ -34,8 +34,8 @@ bool isPowerGenerated;
 
 
 /*
- * Part B: This is the set up part, whcih shows all possible settings.
- */
+   Part B: This is the set up part, whcih shows all possible settings.
+*/
 void setup() {
   Serial.begin(9600);
 
@@ -65,7 +65,7 @@ void setup() {
   pinMode(ElectricityCuteOffTriger, INPUT);
   pinMode(ElectricityReset, INPUT);
 
-    
+
   // OUTPUT
   pinMode(blueWordSoundTriger, OUTPUT);
   pinMode(secondMP3Triger, OUTPUT);
@@ -75,10 +75,12 @@ void setup() {
 }
 
 /*
- * Part C: This is the main logic of this program
- */
+   Part C: This is the main logic of this program
+*/
 void loop() {
 
+  // Initially, the room is in dark
+  digitalWrite(illumination[4], HIGH);
   // Door controller (The first 5 doors)
   for (int thiswController = 0; thiswController < 5; thiswController ++) {
     int controlSignal = digitalRead(wController[thiswController]);
@@ -88,22 +90,27 @@ void loop() {
   }
 
 
-  // The second MP3 controller 
+  // The second MP3 controller & illumination system controller & blueword mode controller
   /*
-   * Two functions includes, The first is, when the button is the first time been pressed, it will
-   * control the second MP3 player to play a music. When it is not the first time been pressed, if
-   * the count is even number, BLUE WORD MODE will on, else, this mode will off.
-   */
+     Two functions includes, The first is, when the button is the first time been pressed, it will
+     control the entire illumination system, if it is the second time been pressed, then the second
+     MP3 player to play a music. When it is not the first time been pressed, if
+     the count is even number, BLUE WORD MODE will on, else, this mode will off.
+  */
   int secondMP3_blueword_Control =  digitalRead(wController[6]);
   if (secondMP3_blueword_Control == HIGH) {
     secondMP3_blueword_Count++;
   }
   if (secondMP3_blueword_Count == 1) {
+    digitalWrite(illumination[4], LOW);
+    Serial.println("illumination system on");
+  }
+  else if (secondMP3_blueword_Count == 2) {
     Serial.println("Second MP3 player play music");
-    digitalWrite(secondMP3Triger,HIGH);
+    digitalWrite(secondMP3Triger, HIGH);
   }
   else {
-    if (secondMP3_blueword_Count % 2 == 0) {
+    if (secondMP3_blueword_Count % 2 == 1) {
       Serial.println("Enter BlueWord mode");
       blueWordON();
     }
@@ -125,7 +132,7 @@ void loop() {
     electricityCutOff();
   }
   Serial.println(digitalRead(ElectricityReset));
-  
+
   // After Electricity generation, electricity reset
   if (digitalRead(ElectricityReset) == HIGH && isPowerGenerated == false) {
     electricityOn();
@@ -135,8 +142,8 @@ void loop() {
 }
 
 /*
- * Part D: This part is the function used in the main program.
- */
+   Part D: This part is the function used in the main program.
+*/
 // Open all five doors
 void all5DoorOpen() {
   for (int thisDoor = 0; thisDoor < 5; thisDoor ++) {
