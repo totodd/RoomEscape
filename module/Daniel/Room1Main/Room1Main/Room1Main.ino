@@ -42,13 +42,13 @@ void setup() {
   // Door define, initially, the door are all closed, when write to HIGH, relay stop working, door open
   for (int thisDoor = 0; thisDoor < doorCount; thisDoor ++) {
     pinMode(door[thisDoor], OUTPUT);
-    digitalWrite(door[thisDoor], LOW);
+    //digitalWrite(door[thisDoor], LOW);
   }
 
   // Illumination define, initially, the illuminations are light up, when write to HIGH, relay stop, lights off.
   for (int thisillumination = 0; thisillumination < illuminationCount; thisillumination ++) {
     pinMode(illumination[thisillumination], OUTPUT);
-    digitalWrite(illumination[thisillumination], LOW);
+    //digitalWrite(illumination[thisillumination], LOW);
   }
 
   // Alarm define, initially, the alarm turns off, when wirte to LOW, relay work, alarm sounds up.
