@@ -23,7 +23,7 @@ int ExternalillunationTriger[4] = {14, 15, 16, 17};    // This part code seems u
 
 // OUTPUT
 int blueWordSoundTriger = 11;             // Write this triger to high if blueword sound is required
-int secondMP3Triger = 18;                 // Write this triger to high if the second MP3 triger is required
+int pinPadTriger = 18;                 // Write this triger to high if the second MP3 triger is required
 
 // Wireless Controller
 int wController[8] = {4, 2, 5, 3, 9, 7, 10, 8};
@@ -68,7 +68,7 @@ void setup() {
 
   // OUTPUT
   pinMode(blueWordSoundTriger, OUTPUT);
-  pinMode(secondMP3Triger, OUTPUT);
+  pinMode(pinPadTriger, OUTPUT);
 
   // State Control
   isPowerGenerated = false;
@@ -138,6 +138,14 @@ void loop() {
     electricityOn();
     Serial.println("electricity ON");
     isPowerGenerated = true;
+  }
+
+  // PinPad is actived
+  if (digitalRead(pinPadTriger) == HIGH){
+    all5DoorOpen();
+    restDoorOpen();
+    electricityCutOff();
+    digitalWrite(alarm, LOW);
   }
 }
 
