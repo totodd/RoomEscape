@@ -48,13 +48,13 @@ void setup () {
   pinMode(Electricity, OUTPUT);
   pinMode(Lighting, OUTPUT);
   pinMode(StartTriger, INPUT_PULLUP);
-  digitalWrite(StartTriger,LOW);
+  digitalWrite(StartTriger, LOW);
 
 }
 
 void loop() {
   Serial.println(digitalRead(Lighting));
-if (digitalRead(StartTriger) == HIGH) {
+  if (digitalRead(StartTriger) == HIGH) {
     combination(5000);
     while (1) {
       lightingMode(5000);
@@ -125,7 +125,7 @@ void Tongyaomode(int a) {
     if (a == 0 && LightingTime == 1) {
       digitalWrite(Electricity, HIGH);
       delay(1000);
-      digitalWrite(Electricity,LOW);
+      digitalWrite(Electricity, LOW);
     }
   }
   LightingTime = 0;
