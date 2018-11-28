@@ -68,7 +68,6 @@ void setup() {
 
   // OUTPUT
   pinMode(blueWordSoundTriger, OUTPUT);
-  digitalWrite(blueWordSoundTriger,LOW)
   pinMode(pinPadTriger, OUTPUT);
 
   // State Control
@@ -101,7 +100,10 @@ void loop() {
     secondMP3_blueword_Count++;
     delay(300);
   }
-  if (secondMP3_blueword_Count == 1) {
+  if (secondMP3_blueword_Count == 0){
+    Serial.println("Waiting for command");
+  }
+  else if (secondMP3_blueword_Count == 1) {
     digitalWrite(illumination[4], HIGH);
     Serial.println("illumination system on");
   }
