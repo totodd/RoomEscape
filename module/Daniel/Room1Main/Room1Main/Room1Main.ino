@@ -68,7 +68,7 @@ void setup() {
 
   // OUTPUT
   pinMode(blueWordSoundTriger, OUTPUT);
-  digitalRead(blueWordSoundTriger,LOW)
+  digitalWrite(blueWordSoundTriger,LOW)
   pinMode(pinPadTriger, OUTPUT);
 
   // State Control
@@ -99,6 +99,7 @@ void loop() {
   int secondMP3_blueword_Control =  digitalRead(wController[6]);
   if (secondMP3_blueword_Control == HIGH) {
     secondMP3_blueword_Count++;
+    delay(300);
   }
   if (secondMP3_blueword_Count == 1) {
     digitalWrite(illumination[4], HIGH);
