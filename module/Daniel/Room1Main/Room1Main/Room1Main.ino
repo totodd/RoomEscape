@@ -22,7 +22,7 @@ int ElectricityReset = 13;                // When this triger is high, recover t
 int ExternalillunationTriger[4] = {14, 15, 16, 17};    // This part code seems useless, may delete later
 
 // OUTPUT
-int blueWordSoundTriger = 11;             // Write this triger to high if blueword sound is required
+int blueWordSoundTriger = 51;             // Write this triger to high if blueword sound is required
 int pinPadTriger = 18;                 // Write this triger to high if the second MP3 triger is required
 
 // Wireless Controller
@@ -68,6 +68,7 @@ void setup() {
 
   // OUTPUT
   pinMode(blueWordSoundTriger, OUTPUT);
+  digitalRead(blueWordSoundTriger,LOW)
   pinMode(pinPadTriger, OUTPUT);
 
   // State Control
