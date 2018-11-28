@@ -105,11 +105,13 @@ void loop() {
   }
   else if (secondMP3_blueword_Count == 1) {
     digitalWrite(illumination[4], HIGH);
+    digitalWrite(illumination[4], LOW);
     Serial.println("illumination system on");
   }
   else if (secondMP3_blueword_Count == 2) {
     Serial.println("Second MP3 player play music");
     digitalWrite(blueWordSoundTriger, HIGH);
+    digitalWrite(illumination[4], LOW);
   }
   else {
     if (secondMP3_blueword_Count % 2 == 1) {
@@ -186,6 +188,7 @@ void blueWordON() {
   digitalWrite(illumination[4], LOW);
   digitalWrite(alarm, HIGH);
   digitalWrite(blueWordSoundTriger, HIGH);
+  digitalWrite(illumination[4], LOW);
 }
 
 // blueWordOn
