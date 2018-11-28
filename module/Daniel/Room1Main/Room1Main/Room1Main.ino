@@ -31,6 +31,9 @@ int wController[8] = {4, 2, 5, 3, 9, 7, 10, 8};
 
 // State Controll
 bool isPowerGenerated;
+bool isIllumination;
+bool isSecondMP3;
+bool isBlueword;
 
 
 /*
@@ -46,10 +49,12 @@ void setup() {
   }
 
   // Illumination define, initially, the illuminations are light off, when write to HIGH, relay start working, lights on.
-  for (int thisillumination = 0; thisillumination < illuminationCount; thisillumination ++) {
+  /*for (int thisillumination = 0; thisillumination < illuminationCount; thisillumination ++) {
     pinMode(illumination[thisillumination], OUTPUT);
     digitalWrite(illumination[thisillumination], LOW);
-  }
+  }*/
+  pinMode(illumination[4], OUTPUT);
+
 
   // Alarm define, initially, the alarm turns off, when wirte to HIGH, relay work, alarm sounds up.
   pinMode(alarm, OUTPUT);
@@ -72,13 +77,16 @@ void setup() {
 
   // State Control
   isPowerGenerated = false;
+  isIllumination = false;
+  isSecondMP3 = false;
+  isBlueword = false;
 }
 
 /*
    Part C: This is the main logic of this program
 */
 void loop() {
-
+  
   // Door controller (The first 5 doors)
   for (int thiswController = 0; thiswController < 5; thiswController ++) {
     int controlSignal = digitalRead(wController[thiswController]);
@@ -98,29 +106,35 @@ void loop() {
   int secondMP3_blueword_Control =  digitalRead(wController[6]);
   if (secondMP3_blueword_Control == HIGH) {
     secondMP3_blueword_Count++;
-    delay(300);
+    delay(500);
   }
-  if (secondMP3_blueword_Count == 0){
+  //Serial.println(secondMP3_blueword_Count);
+  if (secondMP3_blueword_Count == 0) {
+      digitalWrite(illumination[4], LOW);
     Serial.println("Waiting for command");
   }
-  else if (secondMP3_blueword_Count == 1) {
+  else if (secondMP3_blueword_Count == 1 && isIllumination == false) {
     digitalWrite(illumination[4], HIGH);
-    digitalWrite(illumination[4], LOW);
     Serial.println("illumination system on");
+    isIllumination = true;
   }
-  else if (secondMP3_blueword_Count == 2) {
+  else if (secondMP3_blueword_Count == 2 && isSecondMP3 == false) {
     Serial.println("Second MP3 player play music");
     digitalWrite(blueWordSoundTriger, HIGH);
-    digitalWrite(illumination[4], LOW);
+    delay(100);
+    digitalWrite(blueWordSoundTriger, LOW);
+    isSecondMP3 = true;
   }
-  else {
-    if (secondMP3_blueword_Count % 2 == 1) {
+  else if (secondMP3_blueword_Count > 2) {
+    if (secondMP3_blueword_Count % 2 == 1 && isBlueword == false) {
       Serial.println("Enter BlueWord mode");
       blueWordON();
+      isBlueword = true;
     }
-    else {
+    else if (secondMP3_blueword_Count % 2 == 0 && isBlueword == true){
       Serial.println("Exist BlueWord mode");
       blueWordOFF();
+      isBlueword = false;
     }
   }
 
@@ -135,7 +149,7 @@ void loop() {
   if (digitalRead(ElectricityCuteOffTriger) == HIGH) {
     electricityCutOff();
   }
-  Serial.println(digitalRead(ElectricityReset));
+
 
   // After Electricity generation, electricity reset
   if (digitalRead(ElectricityReset) == HIGH && isPowerGenerated == false) {
@@ -145,7 +159,7 @@ void loop() {
   }
 
   // PinPad is actived
-  if (digitalRead(pinPadTriger) == HIGH){
+  if (digitalRead(pinPadTriger) == HIGH) {
     all5DoorOpen();
     restDoorOpen();
     electricityCutOff();
@@ -188,7 +202,8 @@ void blueWordON() {
   digitalWrite(illumination[4], LOW);
   digitalWrite(alarm, HIGH);
   digitalWrite(blueWordSoundTriger, HIGH);
-  digitalWrite(illumination[4], LOW);
+      delay(100);
+  digitalWrite(blueWordSoundTriger, LOW);
 }
 
 // blueWordOn
