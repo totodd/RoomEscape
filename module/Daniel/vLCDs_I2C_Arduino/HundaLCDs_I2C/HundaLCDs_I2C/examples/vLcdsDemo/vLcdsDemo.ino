@@ -26,7 +26,9 @@ uint8_t   targe_Id = 0;
 
 int button = 3;
 int mp3 = 4;
+int out = 5;
 
+bool isCallAnswered = false;
 LiquidCrystal TFTlcd(13);//RST pin13
 
 void setup()
@@ -40,10 +42,11 @@ void setup()
   TFTlcd.begin();
 
   attachInterrupt(0, LcdIICInterrupt, FALLING); //Interrupt 0 is D2 PIN
-  TFTlcd.SetPage(3);//main page id is 4
+  TFTlcd.SetPage(3);
 
   pinMode(button, INPUT_PULLUP);
   pinMode(mp3, INPUT_PULLUP);
+  pinMode(out, OUTPUT);
 }
 
 void LcdIICInterrupt()
@@ -75,33 +78,43 @@ void LcdIICInterrupt()
 
 void loop()
 {
-  data_size = TFTlcd.queue_find_cmd(cmd_buffer,CMD_MAX_SIZE);
-    if(data_size>0)//receive command
-    {
+  data_size = TFTlcd.queue_find_cmd(cmd_buffer, CMD_MAX_SIZE);
+  if (data_size > 0) //receive command
+  {
     //Serial.println(data_size, HEX);
     Serial.println(F("ProcessMessage"));
     ProcessMessage((PCTRL_MSG)cmd_buffer, data_size);//command process
-    }
+  }
 
-    if(update_en)
-    {
+  if (update_en)
+  {
     Serial.println(F("UpdateUI"));
     update_en = 0;
     delay(100);
     UpdateUI();
+    if (page_Id == 1 && isCallAnswered == false) {
+      digitalWrite(out, HIGH);
+      delay(100);
+      Serial.println("coming");
+      isCallAnswered = true;
     }
-  Serial.println(digitalRead(button));
+    else {
+      digitalWrite(out, LOW);
+    }
+  }
+  Serial.println(page_Id);
   if (digitalRead(button) == HIGH) {
-    TFTlcd.SetPage(9);
+    TFTlcd.SetPage(11);
     delay(3000);
-    TFTlcd.SetPage(6);
+    TFTlcd.SetPage(9);
     delay(1500);
     TFTlcd.SetPage(2);
     delay(1000);
+
   }
 
   if (digitalRead(mp3) == HIGH) {
-    TFTlcd.SetPage(6);
+    TFTlcd.SetPage(9);
     delay(1000);
   }
 
@@ -322,11 +335,11 @@ void NotifyGetEdit(PEDIT_MSG msg)
 
 
   //The test passward number 1 2 3 4,ASCII code is 0x31 0x32 0x33 0x34
-  if (msg->param[0] == 0x31 && msg->param[1] == 0x32 && msg->param[2] == 0x33 && msg->param[3] == 0x34)
+  if (msg->param[0] == 0x32 && msg->param[1] == 0x33 && msg->param[2] == 0x36)
   {
     TFTlcd.Display_Message(0X18, 2, (unsigned char *)String01);
-        delay(1000);
-        TFTlcd.SetPage(4);
+    delay(1000);
+    TFTlcd.SetPage(8);
     delay(1000);
   }
   else
@@ -345,7 +358,7 @@ void NotifyGetTouchEdit(PEDIT_MSG msg)
 
 
   //The test passward number 1 2 3 4,ASCII code is 0x31 0x32 0x33 0x34
-  if (msg->param[0] == 0x31 && msg->param[1] == 0x32 && msg->param[2] == 0x33 && msg->param[3] == 0x34)
+  if (msg->param[0] == 0x32 && msg->param[1] == 0x33 && msg->param[2] == 0x36)
   {
     TFTlcd.Display_Message(0X18, 2, (unsigned char *)String04);
   }
