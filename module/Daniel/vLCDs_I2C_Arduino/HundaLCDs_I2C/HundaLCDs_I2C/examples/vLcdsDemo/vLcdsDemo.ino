@@ -24,9 +24,16 @@ uint8_t   page_Id_bk = 0;
 uint8_t   page_Id = 0;
 uint8_t   targe_Id = 0;
 
-int button = 3;
-int mp3 = 4;
+// input
+int button = 3;              // This is used to receive when A2, 4th sound is played.
+int mp3 = 4;                 // This is used to receive when the calling phone sound is finished
 
+// Output
+int Answerout = 5;           // This is used to send "HIGH", when it is required to play the call sound
+int Welcomeout = 6;          // THis is used to send "HIGH", when it is required to play the welcome sound  
+int Callingout = 7;          // This is used to send "HIGH", when it is required to play the calling sound
+
+bool isCallAnswered = false;
 LiquidCrystal TFTlcd(13);//RST pin13
 
 void setup()
@@ -40,10 +47,13 @@ void setup()
   TFTlcd.begin();
 
   attachInterrupt(0, LcdIICInterrupt, FALLING); //Interrupt 0 is D2 PIN
-  TFTlcd.SetPage(3);//main page id is 4
+  TFTlcd.SetPage(3);
 
   pinMode(button, INPUT_PULLUP);
   pinMode(mp3, INPUT_PULLUP);
+  pinMode(Answerout, OUTPUT);
+
+  pinMode(Callingout,OUTPUT);
 }
 
 void LcdIICInterrupt()
@@ -75,33 +85,55 @@ void LcdIICInterrupt()
 
 void loop()
 {
-  data_size = TFTlcd.queue_find_cmd(cmd_buffer,CMD_MAX_SIZE);
-    if(data_size>0)//receive command
-    {
+  data_size = TFTlcd.queue_find_cmd(cmd_buffer, CMD_MAX_SIZE);
+  if (data_size > 0) //receive command
+  {
     //Serial.println(data_size, HEX);
     Serial.println(F("ProcessMessage"));
     ProcessMessage((PCTRL_MSG)cmd_buffer, data_size);//command process
-    }
+  }
 
-    if(update_en)
-    {
+  if (update_en)
+  {
     Serial.println(F("UpdateUI"));
     update_en = 0;
     delay(100);
     UpdateUI();
+    // if answering the phone
+    if (page_Id == 1 && isCallAnswered == false) {
+      digitalWrite(Answerout, HIGH);
+      delay(50);
+      digitalWrite(Answerout, LOW);
+      isCallAnswered = true;
+      delay(19000);
+      TFTlcd.SetPage(9);
+      
     }
-  Serial.println(digitalRead(button));
+    else {
+      digitalWrite(Answerout, LOW);
+    }
+  }
+  Serial.println(page_Id);
   if (digitalRead(button) == HIGH) {
+    // Welcome
+    TFTlcd.SetPage(11);
+    digitalWrite(Welcomeout,HIGH);    // send signal to play the welcome sound
+    delay(50);
+    digitalWrite(Welcomeout,LOW);
+    delay(2500);
+    // Enter the main page of the phone
     TFTlcd.SetPage(9);
-    delay(3000);
-    TFTlcd.SetPage(6);
     delay(1500);
+    // Calling
     TFTlcd.SetPage(2);
-    delay(1000);
+    digitalWrite(Callingout,HIGH);      // send signal to play the calling sound
+    delay(50);
+    digitalWrite(Callingout,LOW);
+
   }
 
-  if (digitalRead(mp3) == HIGH) {
-    TFTlcd.SetPage(6);
+  if (digitalRead(mp3) == HIGH) {       // to main when the answer sound is finished.
+    TFTlcd.SetPage(9);
     delay(1000);
   }
 
@@ -176,90 +208,6 @@ void UpdateUI()
     TFTlcd.SetLableValue(page_Id, 17, (unsigned char *)String03);
     TFTlcd.SetLableValue(page_Id, 18, (unsigned char *)String03);
   }
-  else if (page_Id == Waveform_PAGE)
-  {
-    Serial.println(F("Waveform_PAGE"));
-    for (i = -125; i < 125; i += 1)
-    {
-      value = 20 * sin(PI / 50 * i);
-      TFTlcd.SetWaveformValue(page_Id, 9, 2, value + 119);
-      TFTlcd.SetWaveformValue(page_Id, 9, 1, value + 59);
-      delay(10);
-    }
-  }
-  else if (page_Id == Temperture_PAGE)
-  {
-    value = 20;
-    for (i = 0; i <= 10; i += 1)
-    {
-      TFTlcd.SetThermometerValue(page_Id, 9, value);
-      TFTlcd.SetNumberValue(page_Id, 11, value - 20);
-      value += 10;
-      delay(200);
-    }
-
-    value = 120;
-    for (i = 0; i <= 10; i += 1)
-    {
-      TFTlcd.SetThermometerValue(page_Id, 9, value);
-      TFTlcd.SetNumberValue(page_Id, 11, value - 20);
-      value -= 10;
-      delay(200);
-    }
-  }
-  else if (page_Id == Slider_PAGE)
-  {
-    value = 0;
-    for (i = 0; i < 10; i += 1)
-    {
-      TFTlcd.SetProgressbarValue(page_Id, 18, value);
-      TFTlcd.SetProgressbarValue(page_Id, 20, value);
-      value += 10;
-      delay(200);
-    }
-  }
-  else if (page_Id == CircleGauge_PAGE)
-  {
-    value = 0;
-    for (i = 0; i <= 10; i += 1)
-    {
-      TFTlcd.SetCircleGaugeValue(page_Id, 37, value);
-      TFTlcd.SetBarGaugeValue(page_Id, 40, value);
-
-      value += 10;
-      delay(200);
-    }
-
-    value = 100;
-    for (i = 0; i <= 10; i += 1)
-    {
-      TFTlcd.SetCircleGaugeValue(page_Id, 37, value);
-      TFTlcd.SetBarGaugeValue(page_Id, 40, value);
-
-      value -= 10;
-      delay(200);
-    }
-  }
-  else if (page_Id == BarGauge_PAGE)
-  {
-    value = 0;
-    for (i = 0; i <= 10; i += 1)
-    {
-      TFTlcd.SetBatteryValue(page_Id, 44, value);
-      TFTlcd.SetWaterGaugeValue(page_Id, 42, value);
-      value += 10;
-      delay(100);
-    }
-
-    value = 100;
-    for (i = 0; i <= 10; i += 1)
-    {
-      TFTlcd.SetBatteryValue(page_Id, 44, value);
-      TFTlcd.SetWaterGaugeValue(page_Id, 42, value);
-      value -= 10;
-      delay(100);
-    }
-  }
 }
 
 void NotifyTouchButton(uint8_t page_id, uint8_t control_id, uint8_t  state, uint8_t type, uint8_t value)
@@ -322,11 +270,11 @@ void NotifyGetEdit(PEDIT_MSG msg)
 
 
   //The test passward number 1 2 3 4,ASCII code is 0x31 0x32 0x33 0x34
-  if (msg->param[0] == 0x31 && msg->param[1] == 0x32 && msg->param[2] == 0x33 && msg->param[3] == 0x34)
+  if (msg->param[0] == 0x32 && msg->param[1] == 0x33 && msg->param[2] == 0x36)
   {
     TFTlcd.Display_Message(0X18, 2, (unsigned char *)String01);
-        delay(1000);
-        TFTlcd.SetPage(4);
+    delay(1000);
+    TFTlcd.SetPage(8);
     delay(1000);
   }
   else
@@ -345,7 +293,7 @@ void NotifyGetTouchEdit(PEDIT_MSG msg)
 
 
   //The test passward number 1 2 3 4,ASCII code is 0x31 0x32 0x33 0x34
-  if (msg->param[0] == 0x31 && msg->param[1] == 0x32 && msg->param[2] == 0x33 && msg->param[3] == 0x34)
+  if (msg->param[0] == 0x32 && msg->param[1] == 0x33 && msg->param[2] == 0x36)
   {
     TFTlcd.Display_Message(0X18, 2, (unsigned char *)String04);
   }
