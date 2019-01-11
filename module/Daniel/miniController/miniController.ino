@@ -49,10 +49,10 @@ void multiple(int number) {
     digitalWrite(OutputSignal1, HIGH);
     digitalWrite(OutputSignal2,LOW);
     digitalWrite(OutputSignal3, HIGH);
-    delay(10000);
-    for (int n = 0; n < number; n++) {
-      mRegister[n] = 0;
-    }
+//    delay(10000);
+//    for (int n = 0; n < number; n++) {
+//      mRegister[n] = 0;
+//    }
 
   } else {
     digitalWrite(OutputSignal1, LOW);

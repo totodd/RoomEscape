@@ -126,8 +126,8 @@ void pinMatchCheck() {
   if (array_cmp(currentPin, presetPin, 16, 16) == true) {
     Serial.println("Pin Matched");
     digitalWrite(externalSignal, HIGH);
-    delay(10000);
-    digitalWrite(externalSignal, LOW);
+//    delay(10000);
+//    digitalWrite(externalSignal, LOW);
   }
   else {
     digitalWrite(externalSignal, LOW);

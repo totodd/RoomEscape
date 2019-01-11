@@ -44,10 +44,10 @@ void multiple(int number) {
   }
   if (check_inputCondition(number, mRegister)) {
     digitalWrite(OutputSignal, HIGH);
-    delay(10000);
-    for (int n = 0; n < number; n++) {
-      mRegister[n] = 1;
-    }
+//    delay(10000);
+//    for (int n = 0; n < number; n++) {
+//      mRegister[n] = 1;
+//    }
 
   } else {
     digitalWrite(OutputSignal, LOW);
