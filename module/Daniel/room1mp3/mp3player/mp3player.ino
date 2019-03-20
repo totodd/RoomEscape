@@ -41,6 +41,10 @@ int lightingRemainTime = 2000;
 // This defines when the TongYao and Lighting should play.
 int StartTriger = 2;
 
+
+//
+int lighting_loop = 0;
+int Tongyao_loop = 0;
 void setup () {
   Serial.begin (9600);
   mp3_set_serial (Serial);    //set Serial for DFPlayer-mini mp3 module
@@ -54,8 +58,9 @@ void setup () {
 
 void loop() {
   Serial.println(digitalRead(Lighting));
+  digitalWrite(StartTriger, HIGH);
   if (digitalRead(StartTriger) == HIGH) {
-    combination(5000);
+    combination(24000);
     while (1) {
       lightingMode(5000);
       lightingDuration = 0;
@@ -77,15 +82,25 @@ void loop() {
 */
 void lightingMode(int a) {
 
-  // initialize the lighting start time is the time when the funciton is called
-  lightingStartTime = millis();
+
   // while until reach a m seconds
-  while (lightingDuration < a) {
-    // Calculate the current duration from the function is called
-    lightingDuration = millis() - lightingStartTime;
-    // This trigger used to control only sound can be played once.
-    lightingsoundTrigger = 1;
+  while (lighting_loop < 10) {
+    // initialize the lighting start time is the time when the funciton is called
+    lightingStartTime = millis();
+    while (lightingDuration < a) {
+      // Calculate the current duration from the function is called
+      lightingDuration = millis() - lightingStartTime;
+      // This trigger used to control only sound can be played once.
+      lightingsoundTrigger = 1;
+      Serial.print(lightingDuration);
+      Serial.print(" the current state is ");
+      Serial.println(lightingDuration < a);
+    }
+    lighting_loop++;
+    lightingDuration = 0;
+    Serial.println(lighting_loop);
   }
+
 
   // When reaches two minutes, lighting system
   if (lightingsoundTrigger == 1) {
@@ -95,6 +110,7 @@ void lightingMode(int a) {
     Serial.println("This is lighting");
     delay(lightingRemainTime);
     digitalWrite(Lighting, LOW);
+    lighting_loop = 0;
   }
 }
 
@@ -118,7 +134,7 @@ void Tongyaomode(int a) {
   // Play the lighting
   while (LightingTime < FixedLightingTime) {
     // The following two scentence need to work together to make it play again and again.
-    lightingMode(5000);
+    lightingMode(18000);
     lightingDuration = 0;
     LightingTime++;
     // When the first lighting finished, cut off the whole electroncity system (send signal to main controller)
@@ -153,10 +169,16 @@ void combination(int a) {
     ** the TongYao will use 2 minus, in order to get the full 10 minus, need to wait another
     ** 2 minus
     * */
-    tongyaoStartTime = millis();
-    while (tongyaoDuration < a) {
-      tongyaoDuration = millis() - tongyaoStartTime;
+    while (Tongyao_loop < 10) {
+      tongyaoStartTime = millis();
+      while (tongyaoDuration < a) {
+        tongyaoDuration = millis() - tongyaoStartTime;
+        Serial.println(tongyaoDuration);
+      }
+      Tongyao_loop++;
+      tongyaoDuration = 0;
     }
+    Tongyao_loop = 0;
     currentTongYao ++;
     tongyaoDuration = 0;
   }
