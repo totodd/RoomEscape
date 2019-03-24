@@ -47,7 +47,7 @@ void multiple(int number) {
   }
   if (check_inputCondition(number, mRegister)) {
     digitalWrite(OutputSignal1, HIGH);
-    digitalWrite(OutputSignal2,LOW);
+    digitalWrite(OutputSignal2,HIGH);
     digitalWrite(OutputSignal3, HIGH);
 //    delay(10000);
 //    for (int n = 0; n < number; n++) {
@@ -56,7 +56,7 @@ void multiple(int number) {
 
   } else {
     digitalWrite(OutputSignal1, LOW);
-    digitalWrite(OutputSignal2,HIGH);
+    digitalWrite(OutputSignal2,LOW);
     digitalWrite(OutputSignal3, LOW);
   }
 }
