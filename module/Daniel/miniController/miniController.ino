@@ -95,5 +95,5 @@ void multiple(int number) {
 
     }
     
-    multiple(modeNumebr);
+    multiple(3);
   }
